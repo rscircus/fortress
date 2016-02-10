@@ -294,48 +294,71 @@ class CodeLine:
       self.leftSpace = ""
 
   #######################################################################
+  # Fix variable declarations                                           #
+  #                                                                     #
+  # (This function must be called after parsing.)                       #
+  #######################################################################
+
+  def fixDeclarationsInCode(self):
+    # 'real*8' to 'real(8)'
+    self.code = re.sub(r"(?i)^\breal\b\s?\*\s?(\d+)\b", r"real(\1)", self.code)
+
+  #######################################################################
   # Add spaces around operators and after commas                        #
   #                                                                     #
   # (This function must be called after parsing.)                       #
   #######################################################################
 
   def addSpacesInCode(self):
-    # this function tries to make sure that strings are ignored,
-    # but I'm not sure if this works
+    # mark non-escaped quotation marks by an 'a' in front (this is arbitrary)
+    marked = re.sub(r"([^\\]|^)(\")", r"\1a\2", self.code)
+    # now split by 'a"'
+    parts = re.split(r"a\"", marked)
+    # now you can go through all even-numbered parts
+    for i in range(0, len(parts), 2):
+      part = parts[i]
 
-    # commas
-    self.code = re.sub(r",\b", r", ", self.code)
+      # commas
+      part = re.sub(r",(\S)", r", \1", part)
 
-    # operator /
-    self.code = re.sub(r"/\b", r"/ ", self.code)
-    self.code = re.sub(r"\b/", r" /", self.code)
+      # operator /
+      if part.find("common") == -1:
+        part = re.sub(r"(/)(\S)", r"\1 \2", part)
+        part = re.sub(r"(\S)(/)", r"\1 \2", part)
 
-    # operator *
-    self.code = re.sub(r"(\*)\b", r"\1 ", self.code)
-    self.code = re.sub(r"\b(\*)", r" \1", self.code)
+      # operator * (only if it's not **)
+      part = re.sub(r"((?:[^\*]|^)\*)([^\s\*])", r"\1 \2", part)
+      part = re.sub(r"([^\s\*])(\*(?:[^\*]|$))", r"\1 \2", part)
 
-    # operator -
-    self.code = re.sub(r"(-)\b", r"\1 ", self.code)
-    self.code = re.sub(r"\b(-)", r" \1", self.code)
+      # operator -
+      part = re.sub(r"(-)(\S)", r"\1 \2", part)
+      part = re.sub(r"(\S)(-)", r"\1 \2", part)
 
-    # operator +
-    self.code = re.sub(r"(\+)\b", r"\1 ", self.code)
-    self.code = re.sub(r"\b(\+)", r" \1", self.code)
+      # operator +
+      part = re.sub(r"(\+)(\S)", r"\1 \2", part)
+      part = re.sub(r"(\S)(\+)", r"\1 \2", part)
 
-    # operator =
-    self.code = re.sub(r"(=)\b", r"\1 ", self.code)
-    self.code = re.sub(r"\b(=)", r" \1", self.code)
+      # operator =
+      part = re.sub(r"(=)(\S)", r"\1 \2", part)
+      part = re.sub(r"(\S)(=)", r"\1 \2", part)
 
-    # after 'if', 'where'
-    self.code = re.sub(r"(?i)\b(if|where)\(", r"\1 (", self.code)
-    # before 'then'
-    self.code = re.sub(r"(?i)\)then\b", r") then", self.code)
+      # after 'if', 'where'
+      part = re.sub(r"(?i)\b(if|where)\(", r"\1 (", part)
+      # before 'then'
+      part = re.sub(r"(?i)\)then\b", r") then", part)
 
-    # 'endif', 'enddo', 'endwhile' -> 'end if', ...
-    self.code = re.sub(r"(?i)\bend(if|do|while)\b", r"end \1", self.code)
+      # 'endif', 'enddo', 'endwhile' -> 'end if', ...
+      part = re.sub(r"(?i)\bend(if|do|while)\b", r"end \1", part)
+      # 'inout' -> 'in out'
+      part = re.sub(r"(?i)\binout\b", r"in out", part)
 
-    # '.eq.', ...
-    self.code = re.sub(r"(?i)(\S)(\.(?:eq|ne|lt|gt|le|ge|and|or)\.)(\S)", r"\1 \2 \3", self.code)
+      # '.eq.', ...
+      part = re.sub(r"(?i)(\S)(\.(?:eq|ne|lt|gt|le|ge|and|or)\.)(\S)", r"\1 \2 \3", part)
+
+      parts[i] = part
+
+    # put parts back together
+    self.code = "\"".join(parts)
 
   #######################################################################
   # Find out if this line increases the indentation afterwards          #

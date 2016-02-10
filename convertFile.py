@@ -42,6 +42,7 @@ codeFile.identifyContinuations()
 for codeLine in codeFile.codeLines:
   codeLine.convertFixedToFree()
   codeLine.addSpacesInCode()
+  codeLine.fixDeclarationsInCode()
 
 codeFile.fixIndentation("    ", 2)
 codeFile.markLongLines(80)

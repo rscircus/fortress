@@ -28,6 +28,7 @@ def transformFile(oldFile, newFile):
     codeLine.parseLine()
     codeLine.stripTrailingWhitespace()
     codeLine.unindentPreProc()
+    codeLine.verifyContinuation()
 
   codeFile.identifyContinuations()
 

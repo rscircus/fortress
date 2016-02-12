@@ -330,12 +330,14 @@ class CodeLine:
 
     # continuation
     if len(self.fixedCont):
-      self.freeContBeg = "& "
+      # need double check in case there is no code
+      if self.isContinuation:
+        self.freeContBeg = "&"
       self.fixedCont = ""
 
     # continued line?
     if self.isContinued:
-      self.freeContEnd = " &"
+      self.freeContEnd = "&"
 
   #######################################################################
   # Prescribe an indentation for the line                               #
@@ -461,6 +463,18 @@ class CodeLine:
   def unindentPreProc(self):
     if len(self.preProc):
       self.preProc = "#" + self.preProc[1:].lstrip()
+
+  #######################################################################
+  # Function to make sure that continuation actually contains code      #
+  #                                                                     #
+  # (This function must be called after parsing and before              #
+  #  continuations are identified.)                                     #
+  #######################################################################
+
+  def verifyContinuation(self):
+    if not self.hasCode():
+      self.isContinuation = False
+
 
   #######################################################################
   # Swallow up length changes in space between code and comment         #

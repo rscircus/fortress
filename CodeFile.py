@@ -3,10 +3,15 @@
 # This is a library to parse Fortran source files.
 #
 # ToDo:
-# - Currently, '&' at end of line are not recognized as continued
-#   line when parsing free-form
-# - Check if statement checks for indentation are complete
-# - Check if 'where' statements are matched correctly
+# - Currently, '!' marks appearing in strings could be misinterpreted
+#   as initiating comments.
+# - Currently, '&' signs at the endings of lines are not recognized as
+#   continued line when parsing free-form code.
+# - Check if statement checks for indentation are complete.
+# - Check if 'where' statements are matched correctly.
+# - Operator matching usually does not work at beginnings or endings
+#   of parts.
+# - Recognize 'common' only at beginning of statement (using RegEx).
 #
 # created by Florian Zwicke, Feb. 10, 2016
 #########################################################################
@@ -68,8 +73,55 @@ class CodeFile:
   def markLongLines(self, allowedLength):
     for codeLine in self.codeLines:
       if codeLine.getLength() > allowedLength:
-        codeLine.remarks.append("Line is longer than " + str(allowedLength) \
+        codeLine.remarks.append("Line above is longer than " + str(allowedLength) \
             + " characters.")
+
+  #######################################################################
+  # Look for old-style Doxygen blocks and transform them                #
+  #                                                                     #
+  # (This must be called after parsing and converting to free-form.)    #
+  #######################################################################
+
+  def transformDoxygenBlocks(self, length):
+    inBlock = False
+    for codeLine in self.codeLines:
+      if codeLine.comment.count("c") == 70:
+        inBlock = not inBlock
+        codeLine.comment = "!" + "-" * (length - 1)
+        continue
+
+      if inBlock:
+        # is it many dashes?
+        if codeLine.comment.count("-") == 60:
+          codeLine.comment = "!>"
+          continue
+
+        # is it the filename?
+        match = re.match(r"!\s(\S+\.\S+)\s+c$", codeLine.comment)
+        if match:
+          codeLine.comment = "!> @file " + match.group(1)
+          continue
+
+        # is it a param?
+        match = re.match(r"!\s>\s+\\(param.*?)$", codeLine.comment)
+        if match:
+          codeLine.comment = "!> @" + match.group(1)
+          continue
+
+        # is it a date?
+        match = re.match(r"!\s(\d{4}\.\d{2}\.\d{2})\s-\s(.*?)\s+c$", codeLine.comment)
+        if match:
+          codeLine.comment = "!> @date " + match.group(1) + " -- " + match.group(2)
+          continue
+
+        # is it a mail address?
+        match = re.match(r"!\s(.*?)\s\[(.*?@.*?\..*?)\]\s+c$", codeLine.comment)
+        if match:
+          codeLine.comment = "!> @authors " + match.group(1) + " <" + match.group(2) + ">"
+          continue
+
+        # or is it the description?
+        codeLine.comment = "!> @brief " + codeLine.comment[3:].lstrip()
 
   #######################################################################
   # Function to search for continuations                                #
@@ -118,6 +170,7 @@ class CodeLine:
     self.isFreeForm = isFreeForm
     self.remarks = []
     self.line = line
+    self.origCodeLength = 0
 
     # line parts
     self.preProc = ""
@@ -186,7 +239,7 @@ class CodeLine:
         return
 
       # check for label
-      match = re.match(r"(\d+)(.*?)$", self.line)
+      match = re.match(r"\s{0,4}(\d+)(.*?)$", self.line)
       if match:
         self.fixedLabel = match.group(1)
         self.line = match.group(2)
@@ -227,6 +280,9 @@ class CodeLine:
     # finished
     self.code = self.line
     self.line = ""
+
+    # record length of code in this line
+    self.origCodeLength = len(self.code)
 
   #######################################################################
   # Check if line has code                                              #
@@ -300,8 +356,9 @@ class CodeLine:
   #######################################################################
 
   def fixDeclarationsInCode(self):
-    # 'real*8' to 'real(8)'
+    # 'real*8' to 'real(RK)'
     self.code = re.sub(r"(?i)^\breal\b\s?\*\s?(\d+)\b", r"real(\1)", self.code)
+    #self.code = re.sub(r"(?i)^\breal\b\s?\*\s?8\b", r"real(RK)", self.code)
 
   #######################################################################
   # Add spaces around operators and after commas                        #
@@ -318,29 +375,29 @@ class CodeLine:
     for i in range(0, len(parts), 2):
       part = parts[i]
 
-      # commas
-      part = re.sub(r",(\S)", r", \1", part)
+      ## commas
+      #part = re.sub(r",(\S)", r", \1", part)
 
-      # operator /
-      if part.find("common") == -1:
-        part = re.sub(r"(/)(\S)", r"\1 \2", part)
-        part = re.sub(r"(\S)(/)", r"\1 \2", part)
+      ## operator /
+      #if part.find("common") == -1:
+      #  part = re.sub(r"(/)(\S)", r"\1 \2", part)
+      #  part = re.sub(r"(\S)(/)", r"\1 \2", part)
 
-      # operator * (only if it's not **)
-      part = re.sub(r"((?:[^\*]|^)\*)([^\s\*])", r"\1 \2", part)
-      part = re.sub(r"([^\s\*])(\*(?:[^\*]|$))", r"\1 \2", part)
+      ## operator * (only if it's not **)
+      #part = re.sub(r"((?:[^\*]|^)\*)([^\s\*])", r"\1 \2", part)
+      #part = re.sub(r"([^\s\*])(\*(?:[^\*]|$))", r"\1 \2", part)
 
-      # operator -
-      part = re.sub(r"(-)(\S)", r"\1 \2", part)
-      part = re.sub(r"(\S)(-)", r"\1 \2", part)
+      ## operator -
+      #part = re.sub(r"(-)(\S)", r"\1 \2", part)
+      #part = re.sub(r"(\S)(-)", r"\1 \2", part)
 
-      # operator +
-      part = re.sub(r"(\+)(\S)", r"\1 \2", part)
-      part = re.sub(r"(\S)(\+)", r"\1 \2", part)
+      ## operator +
+      #part = re.sub(r"(\+)(\S)", r"\1 \2", part)
+      #part = re.sub(r"(\S)(\+)", r"\1 \2", part)
 
-      # operator =
-      part = re.sub(r"(=)(\S)", r"\1 \2", part)
-      part = re.sub(r"(\S)(=)", r"\1 \2", part)
+      ## operator =
+      #part = re.sub(r"(=)(\S)", r"\1 \2", part)
+      #part = re.sub(r"(\S)(=)", r"\1 \2", part)
 
       # after 'if', 'where'
       part = re.sub(r"(?i)\b(if|where)\(", r"\1 (", part)
@@ -353,7 +410,8 @@ class CodeLine:
       part = re.sub(r"(?i)\binout\b", r"in out", part)
 
       # '.eq.', ...
-      part = re.sub(r"(?i)(\S)(\.(?:eq|ne|lt|gt|le|ge|and|or)\.)(\S)", r"\1 \2 \3", part)
+      #part = re.sub(r"(?i)(\S)(\.(?:eq|ne|lt|gt|le|ge|and|or)\.)", r"\1 \2", part)
+      #part = re.sub(r"(?i)(\.(?:eq|ne|lt|gt|le|ge|and|or)\.)(\S)", r"\1 \2", part)
 
       parts[i] = part
 
@@ -371,12 +429,12 @@ class CodeLine:
         or re.match(r"(?i)if\b.*?\bthen\b", self.code) \
         or re.match(r"(?i)subroutine\b", self.code) \
         or re.match(r"(?i)module\b", self.code) \
-        or re.match(r"(?i)type\b", self.code) \
+        or re.match(r"(?i)type\s*[^\s\(]", self.code) \
         or re.match(r"(?i)interface\b", self.code) \
         or re.match(r"(?i)block\s?data\b", self.code) \
         or re.match(r"(?i)function\b", self.code) \
         or re.match(r"(?i)where\b.*?\)$", self.code) \
-        or re.match(r"(?i)else(if|do|where)?\b", self.code):
+        or re.match(r"(?i)else(if)?\b", self.code):
       return True
     else:
       return False
@@ -388,7 +446,7 @@ class CodeLine:
   #######################################################################
 
   def decreasesIndentBefore(self):
-    if re.match(r"(?i)(end|else)(if|do|where)?\b", self.code):
+    if re.match(r"(?i)(end(if|do|where)?|else(if)?)\b", self.code):
       return True
     else:
       return False
@@ -402,6 +460,26 @@ class CodeLine:
   def unindentPreProc(self):
     if len(self.preProc):
       self.preProc = "#" + self.preProc[1:].lstrip()
+
+  #######################################################################
+  # Swallow up length changes in space between code and comment         #
+  #                                                                     #
+  # (This function must be called after all code changes.)              #
+  #######################################################################
+
+  def swallowLengthChange(self):
+    # if there is no comment, just return because there is no space to
+    # change
+    if not len(self.comment) or not self.hasCode():
+      return
+
+    lengthChange = len(self.code) - self.origCodeLength
+    # no change for no length change
+    if not lengthChange:
+      return
+    # at least one space must remain
+    numLeftSpaces = max(1, len(self.midSpace) - lengthChange)
+    self.midSpace = " " * numLeftSpaces
 
   #######################################################################
   # Rebuild line from parsed info                                       #
@@ -433,5 +511,5 @@ class CodeLine:
   def rebuild(self):
     output = self.buildFullLine()
     for remark in self.remarks:
-      output += "! REMARK: " + remark + "\n"
+      output += "! TODO: " + remark + "\n"
     return output

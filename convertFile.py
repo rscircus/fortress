@@ -15,37 +15,54 @@ import sys
 from CodeFile import *
 
 #########################################################################
+# Function to transform file                                            #
+#########################################################################
+
+def transformFile(oldFile, newFile):
+  # read in file
+  codeFile = CodeFile(oldFile, False)
+
+  # convert
+  for codeLine in codeFile.codeLines:
+    codeLine.replaceTabs(8)
+    codeLine.parseLine()
+    codeLine.stripTrailingWhitespace()
+    codeLine.unindentPreProc()
+
+  codeFile.identifyContinuations()
+
+  for codeLine in codeFile.codeLines:
+    codeLine.convertFixedToFree()
+    codeLine.addSpacesInCode()
+    codeLine.fixDeclarationsInCode()
+    codeLine.swallowLengthChange()
+
+  codeFile.fixIndentation("    ", 2)
+  #codeFile.transformDoxygenBlocks(100)
+  codeFile.markLongLines(100)
+
+  # output file
+  fOut = open(newFile, "w")
+  fOut.write(codeFile.rebuild())
+  fOut.close()
+
+#########################################################################
 # Main program                                                          #
 #########################################################################
 
+## is a path given?
+#if len(sys.argv) < 2:
+#  print("Usage: " + sys.argv[0] + " oldpath newpath")
+
 # is a filename given?
-if len(sys.argv) < 2:
-  print("Usage: " + sys.argv[0] + " filename")
+if len(sys.argv) < 3:
+  print("Usage: " + sys.argv[0] + " oldfile newfile")
   exit()
-filename = sys.argv[1]
+oldFile = sys.argv[1]
+newFile = sys.argv[2]
+
+transformFile(oldFile, newFile)
+
 # output status message
-print("! created by " + sys.argv[0] + " from source file " + filename)
-print("! on " + time.strftime("%c"))
-
-# read in file
-codeFile = CodeFile(filename, False)
-
-# convert
-for codeLine in codeFile.codeLines:
-  codeLine.replaceTabs(8)
-  codeLine.parseLine()
-  codeLine.stripTrailingWhitespace()
-  codeLine.unindentPreProc()
-
-codeFile.identifyContinuations()
-
-for codeLine in codeFile.codeLines:
-  codeLine.convertFixedToFree()
-  codeLine.addSpacesInCode()
-  codeLine.fixDeclarationsInCode()
-
-codeFile.fixIndentation("    ", 2)
-codeFile.markLongLines(80)
-
-# output file
-print codeFile.rebuild()
+#print("! created by " + sys.argv[0] + " from source file " + filename)
+#print("! on " + time.strftime("%c"))

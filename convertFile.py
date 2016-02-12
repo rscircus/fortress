@@ -35,7 +35,7 @@ def transformFile(oldFile, newFile):
   for codeLine in codeFile.codeLines:
     codeLine.convertFixedToFree()
     codeLine.addSpacesInCode()
-    codeLine.fixDeclarationsInCode()
+    #codeLine.fixDeclarationsInCode()
     codeLine.swallowLengthChange()
 
   codeFile.fixIndentation("    ", 2)

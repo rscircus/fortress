@@ -318,7 +318,8 @@ class CodeLine:
 
     # convert comments
     if len(self.fixedComment):
-      self.comment = "! " + self.fixedComment[1:].lstrip()
+      if len(self.fixedComment[1:].lstrip()):
+        self.comment = "! " + self.fixedComment[1:].lstrip()
       self.fixedComment = ""
       return
 

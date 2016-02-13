@@ -41,11 +41,10 @@ def transformFile(oldFile, newFile):
     codeLine.swallowLengthChange()
     codeLine.stripTrailingWhitespace()
 
+  # converter control
   codeFile.fixIndentation("    ", 2)
   #codeFile.transformDoxygenBlocks(100)
-
-  if codeFile.hint:
-    codeFile.markLongLines(100)
+  codeFile.markLongLines(100)
 
   # output file
   fOut = open(newFile, "w")

@@ -30,13 +30,14 @@ class CodeFile:
   # Function to read the source code from a file                        #
   #######################################################################
 
-  def __init__(self, fileName, isFreeForm, hint):
+  def __init__(self, fileName, isFreeForm, hint=""):
     # try to open file
     with open(fileName) as file:
       content = file.readlines()
 
     # do initializations
     self.codeLines = []
+    self.hint = hint
 
     # go through lines and parse
     for line in content:

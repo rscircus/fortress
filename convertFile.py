@@ -22,6 +22,9 @@ def transformFile(oldFile, newFile):
   # read in file
   codeFile = CodeFile(oldFile, False, "REMARK")
 
+  # exchange with line above to ignore ignore lines
+  #codeFile = CodeFile(oldFile, False)
+
   # convert
   for codeLine in codeFile.codeLines:
     codeLine.replaceTabs(8)
@@ -40,7 +43,9 @@ def transformFile(oldFile, newFile):
 
   codeFile.fixIndentation("    ", 2)
   #codeFile.transformDoxygenBlocks(100)
-  codeFile.markLongLines(100)
+
+  if codeFile.hint:
+    codeFile.markLongLines(100)
 
   # output file
   fOut = open(newFile, "w")

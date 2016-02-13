@@ -41,7 +41,6 @@ class CodeFile:
     for line in content:
       self.codeLines.append(CodeLine(line, isFreeForm, hint))
 
-
   #######################################################################
   # Function to fix the indentation                                     #
   #                                                                     #
@@ -63,7 +62,6 @@ class CodeFile:
       if codeLine.increasesIndentAfter():
         curIndent += 1
 
-
   #######################################################################
   # Function to check line length                                       #
   #                                                                     #
@@ -74,7 +72,6 @@ class CodeFile:
       if codeLine.getLength() > allowedLength:
         codeLine.remarks.append("Line above is longer than " + str(allowedLength) \
             + " characters.")
-
 
   #######################################################################
   # Look for old-style Doxygen blocks and transform them                #

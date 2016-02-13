@@ -63,6 +63,10 @@ class CodeFile:
       if codeLine.increasesIndentAfter():
         curIndent += 1
 
+    # back at zero indentation?
+    if curIndent > 0:
+      self.codeLines[-1].remarks.append("Positive indentation level remaining.")
+
   #######################################################################
   # Function to check line length                                       #
   #                                                                     #
@@ -139,7 +143,7 @@ class CodeFile:
         codeLine.isContinued = True
         # is it a 'tight' continuation?
         if inTightConti and not len(codeLine.midSpace) \
-            and not len(codeLine.rightSpace):
+            and len(codeLine.rightSpace) == 1:
           codeLine.isTightContinued = True
         inConti = False
         inTightConti = False
@@ -269,7 +273,7 @@ class CodeLine:
       self.line = match.group(2)
 
     # check for free comments
-    match = re.match(r"((?:[^!'\"]|\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')*)(\s*)(!.*?)$", \
+    match = re.match(r"((?:[^!'\"]|\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')*?)(\s*)(!.*?)$", \
         self.line)
     if match:
       self.midSpace = match.group(2)
@@ -456,10 +460,29 @@ class CodeLine:
         or re.match(r"(?i)function\b", self.code) \
         or re.match(r"(?i)select\b", self.code) \
         or re.match(r"(?i)case\b", self.code) \
-        or re.match(r"(?i)where\b.*?\)$", self.code) \
-        or re.match(r"(?i)else(if)?\b", self.code):
+        or re.match(r"(?i)else$", self.code):
+        #or re.match(r"(?i)else(if)?\b", self.code):
       return True
     else:
+      # need to check for where statement separately
+      if re.match(r"(?i)where\b", self.code):
+        trans = self.code
+
+        # remove double quoted strings
+        trans = re.sub(r"\"([^\"\\]|\\.)*\"", r"str", trans)
+        # remove single quoted strings
+        trans = re.sub(r"'([^'\\]|\\.)*'", r"str", trans)
+
+        # now keep replacing innermost brackets using '!'
+        # (! cannot occur outside of strings)
+        while re.search(r"\([^\(\)]+\)", trans):
+          trans = re.sub(r"\([^\(\)]+\)", "!", trans)
+
+        # now if just one '!' remains, there was only one
+        # bracket term
+        if trans.count("!") == 1:
+          return True
+
       return False
 
   #######################################################################

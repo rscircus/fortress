@@ -22,7 +22,7 @@ def transformFile(oldFile, newFile):
   # read in file
   codeFile = CodeFile(oldFile, False, "REMARK")
 
-  # exchange with line above to ignore ignore lines
+  # exchange with line above to ignore long lines
   #codeFile = CodeFile(oldFile, False)
 
   # convert

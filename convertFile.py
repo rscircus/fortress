@@ -20,7 +20,7 @@ from CodeFile import *
 
 def transformFile(oldFile, newFile):
   # read in file
-  codeFile = CodeFile(oldFile, False)
+  codeFile = CodeFile(oldFile, False, "REMARK")
 
   # convert
   for codeLine in codeFile.codeLines:

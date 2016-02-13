@@ -30,7 +30,7 @@ class CodeFile:
   # Function to read the source code from a file                        #
   #######################################################################
 
-  def __init__(self, fileName, isFreeForm):
+  def __init__(self, fileName, isFreeForm, hint):
     # try to open file
     with open(fileName) as file:
       content = file.readlines()
@@ -40,7 +40,7 @@ class CodeFile:
 
     # go through lines and parse
     for line in content:
-      self.codeLines.append(CodeLine(line, isFreeForm))
+      self.codeLines.append(CodeLine(line, isFreeForm, hint))
 
   #######################################################################
   # Function to fix the indentation                                     #
@@ -165,12 +165,13 @@ class CodeLine:
   # Function to parse one line of source code                           #
   #######################################################################
 
-  def __init__(self, line, isFreeForm):
+  def __init__(self, line, isFreeForm, hint):
     # initializations
     self.isFreeForm = isFreeForm
     self.remarks = []
     self.line = line
     self.origCodeLength = 0
+    self.hint = hint
 
     # line parts
     self.preProc = ""
@@ -532,5 +533,5 @@ class CodeLine:
   def rebuild(self):
     output = self.buildFullLine()
     for remark in self.remarks:
-      output += "! TODO: " + remark + "\n"
+      output += "! " + self.hint + ": " + remark + "\n"
     return output

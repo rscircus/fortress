@@ -26,7 +26,6 @@ def transformFile(oldFile, newFile):
   for codeLine in codeFile.codeLines:
     codeLine.replaceTabs(8)
     codeLine.parseLine()
-    codeLine.stripTrailingWhitespace()
     codeLine.unindentPreProc()
     codeLine.verifyContinuation()
 
@@ -37,6 +36,7 @@ def transformFile(oldFile, newFile):
     codeLine.addSpacesInCode()
     #codeLine.fixDeclarationsInCode()
     codeLine.swallowLengthChange()
+    codeLine.stripTrailingWhitespace()
 
   codeFile.fixIndentation("    ", 2)
   #codeFile.transformDoxygenBlocks(100)

@@ -3,15 +3,14 @@
 # This is a library to parse Fortran source files.
 #
 # ToDo:
-# - Currently, '!' marks appearing in strings could be misinterpreted
-#   as initiating comments.
+# - Create some variables for regular expressions that are used multiple
+#   times.
 # - Currently, '&' signs at the endings of lines are not recognized as
 #   continued line when parsing free-form code.
 # - Check if statement checks for indentation are complete.
 # - Check if 'where' statements are matched correctly.
 # - Operator matching usually does not work at beginnings or endings
 #   of parts.
-# - Recognize 'common' only at beginning of statement (using RegEx).
 #
 # created by Florian Zwicke, Feb. 10, 2016
 #########################################################################
@@ -126,21 +125,32 @@ class CodeFile:
   #######################################################################
   # Function to search for continuations                                #
   #                                                                     #
-  # (This must be called after parsing.)                                #
+  # (This must be called after parsing but before stripping             #
+  #  whitespaces at end and fixing indentation.)                        #
   #######################################################################
 
   def identifyContinuations(self):
     # go through lines in reverse order
     inConti = False
+    inTightConti = False
     for codeLine in reversed(self.codeLines):
       # is it a code line and is it followed by continuation?
       if codeLine.hasCode() and inConti:
         codeLine.isContinued = True
+        # is it a 'tight' continuation?
+        if inTightConti and not len(codeLine.midSpace) \
+            and not len(codeLine.rightSpace):
+          codeLine.isTightContinued = True
         inConti = False
+        inTightConti = False
 
       # check if line is continuation
       if codeLine.isContinuation:
         inConti = True
+        # is it a 'tight' continuation?
+        if not codeLine.isFreeForm and not len(codeLine.leftSpace):
+          codeLine.isTightContinuation = True
+          inTightConti = True
 
   #######################################################################
   # Function to rebuild the source code from the lines                  #
@@ -193,6 +203,8 @@ class CodeLine:
     # line properties
     self.isContinued = False
     self.isContinuation = False
+    self.isTightContinued = False
+    self.isTightContinuation = False
 
   #######################################################################
   # Remove all tabs from line and replace by right amount of spaces     #
@@ -333,12 +345,12 @@ class CodeLine:
     if len(self.fixedCont):
       # need double check in case there is no code
       if self.isContinuation:
-        self.freeContBeg = "&"
+        self.freeContBeg = "&" if self.isTightContinuation else "& "
       self.fixedCont = ""
 
     # continued line?
     if self.isContinued:
-      self.freeContEnd = "&"
+      self.freeContEnd = "&" if self.isTightContinued else " &"
 
   #######################################################################
   # Prescribe an indentation for the line                               #
@@ -410,6 +422,8 @@ class CodeLine:
 
       # 'endif', 'enddo', 'endwhile' -> 'end if', ...
       part = re.sub(r"(?i)\bend(if|do|while)\b", r"end \1", part)
+      # 'elseif' -> 'else if'
+      part = re.sub(r"(?i)\belseif\b", r"else if", part)
       # 'inout' -> 'in out'
       part = re.sub(r"(?i)\binout\b", r"in out", part)
 

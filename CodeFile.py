@@ -256,7 +256,8 @@ class CodeLine:
       self.line = match.group(2)
 
     # check for free comments
-    match = re.match(r"(.*?)(\s*)(!.*?)$", self.line)
+    match = re.match(r"((?:[^!'\"]|\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')*)(\s*)(!.*?)$", \
+        self.line)
     if match:
       self.midSpace = match.group(2)
       self.comment = match.group(3)
@@ -428,14 +429,18 @@ class CodeLine:
   #######################################################################
 
   def increasesIndentAfter(self):
-    if re.match(r"(?i)(\w+:\s+)?do\b", self.code) \
-        or re.match(r"(?i)if\b.*?\bthen\b", self.code) \
+        #or re.match(r"(?i)(\w+:\s*)?if\b.*?\bthen\b", self.code) \
+    if re.match(r"(?i)(\w+:\s*)?do\b", self.code) \
+        or re.search(r"(?i)\bthen$", self.code) \
+        or re.match(r"(?i)program\b", self.code) \
         or re.match(r"(?i)subroutine\b", self.code) \
         or re.match(r"(?i)module\b", self.code) \
         or re.match(r"(?i)type\s*[^\s\(]", self.code) \
         or re.match(r"(?i)interface\b", self.code) \
         or re.match(r"(?i)block\s?data\b", self.code) \
         or re.match(r"(?i)function\b", self.code) \
+        or re.match(r"(?i)select\b", self.code) \
+        or re.match(r"(?i)case\b", self.code) \
         or re.match(r"(?i)where\b.*?\)$", self.code) \
         or re.match(r"(?i)else(if)?\b", self.code):
       return True
@@ -449,7 +454,8 @@ class CodeLine:
   #######################################################################
 
   def decreasesIndentBefore(self):
-    if re.match(r"(?i)(end(if|do|where)?|else(if)?)\b", self.code):
+    if re.match(r"(?i)(end(if|do|where)?|else(if)?)\b", self.code) \
+        or re.match(r"(?i)case\b", self.code):
       return True
     else:
       return False

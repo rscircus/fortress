@@ -1,6 +1,6 @@
 # Basic Control Structures in Fortran 90:
 
-Remarks and important hints with focus on minimally viable examples.
+Remarks and important hints with focus on minimally viable examples up to FORTRAN 90.
 
 Sources:
 
@@ -9,7 +9,7 @@ Sources:
 * http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/F90-Control.pdf
 * http://www.obliquity.com/computer/fortran
 
-by Roland Siegbert (siegbert@cats.rwth-aachen.de)
+By Roland Siegbert (siegbert@cats.rwth-aachen.de)
 
 ## Versions of Fortran:
 
@@ -21,7 +21,7 @@ by Roland Siegbert (siegbert@cats.rwth-aachen.de)
 1962    FORTRAN IV    - still an important dialect
 1966    ANS FORTRAN   - ANSI standard FORTRAN IV (2 versions)
 1977    FORTRAN 77
-1990    FORTRAN 90
+1990    FORTRAN 90    <--- This document covers FORTRAN until here
 1997    FORTRAN 95
 2004    FORTRAN 2003
 2010    FORTRAN 2008

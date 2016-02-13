@@ -432,30 +432,32 @@ class CodeLine:
   # (This function must be called after parsing.)                       #
   #######################################################################
   def increasesIndentAfter(self):
+    trans = self.code
+
+    # remove double quoted strings
+    trans = re.sub(r"\"([^\"\\]|\\.)*\"", r"str", trans)
+    # remove single quoted strings
+    trans = re.sub(r"'([^'\\]|\\.)*'", r"str", trans)
+
         #or re.match(r"(?i)(\w+:\s*)?if\b.*?\bthen\b", self.code) \
-    if re.match(r"(?i)(\w+:\s*)?do\b", self.code) \
-        or re.search(r"(?i)\bthen$", self.code) \
-        or re.match(r"(?i)program\b", self.code) \
-        or re.match(r"(?i)subroutine\b", self.code) \
-        or re.match(r"(?i)module\b", self.code) \
-        or re.match(r"(?i)type\s*[^\s\(]", self.code) \
-        or re.match(r"(?i)interface\b", self.code) \
-        or re.match(r"(?i)block\s?data\b", self.code) \
-        or re.match(r"(?i)function\b", self.code) \
-        or re.match(r"(?i)select\b", self.code) \
-        or re.match(r"(?i)case\b", self.code) \
-        or re.match(r"(?i)else$", self.code):
+    if re.match(r"(?i)(\w+:\s*)?do\b", trans) \
+        or re.search(r"(?i)\bthen$", trans) \
+        or re.match(r"(?i)program\b", trans) \
+        or re.match(r"(?i)subroutine\b", trans) \
+        or re.match(r"(?i)module\b", trans) \
+        or re.match(r"(?i)type\s*[^\s\(]", trans) \
+        or re.match(r"(?i)interface\b", trans) \
+        or re.match(r"(?i)block\s?data\b", trans) \
+        or re.search(r"(?i)\bfunction\b", trans) \
+        and not re.match(r"(?i)end\b", trans) \
+        or re.match(r"(?i)select\b", trans) \
+        or re.match(r"(?i)case\b", trans) \
+        or re.match(r"(?i)else$", trans):
         #or re.match(r"(?i)else(if)?\b", self.code):
       return True
     else:
       # need to check for where statement separately
-      if re.match(r"(?i)where\b", self.code):
-        trans = self.code
-
-        # remove double quoted strings
-        trans = re.sub(r"\"([^\"\\]|\\.)*\"", r"str", trans)
-        # remove single quoted strings
-        trans = re.sub(r"'([^'\\]|\\.)*'", r"str", trans)
+      if re.match(r"(?i)where\b", trans):
 
         # now keep replacing innermost brackets using '!'
         # (! cannot occur outside of strings)

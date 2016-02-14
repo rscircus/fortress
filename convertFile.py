@@ -70,6 +70,7 @@ if len(sys.argv) < 2:
   exit()
 
 for file in sys.argv[1:]:
+  print "Converting file '" + file + "'..."
   transformFile(file, file)
 
 # output status message

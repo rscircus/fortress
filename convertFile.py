@@ -60,13 +60,17 @@ def transformFile(oldFile, newFile):
 #  print("Usage: " + sys.argv[0] + " oldpath newpath")
 
 # is a filename given?
-if len(sys.argv) < 3:
-  print("Usage: " + sys.argv[0] + " oldfile newfile")
-  exit()
-oldFile = sys.argv[1]
-newFile = sys.argv[2]
+#if len(sys.argv) < 3:
+#  print("Usage: " + sys.argv[0] + " oldfile newfile")
+#  exit()
+#oldFile = sys.argv[1]
+#newFile = sys.argv[2]
 
-transformFile(oldFile, newFile)
+if len(sys.argv) < 2:
+  exit()
+
+for file in sys.argv[1:]:
+  transformFile(file, file)
 
 # output status message
 #print("! created by " + sys.argv[0] + " from source file " + filename)

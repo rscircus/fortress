@@ -11,6 +11,7 @@
 # - Check if 'where' statements are matched correctly.
 # - Operator matching usually does not work at beginnings or endings
 #   of parts.
+# - CodeStatement for (cont.) statement identification
 #
 # created by Florian Zwicke, Feb. 10, 2016
 #########################################################################

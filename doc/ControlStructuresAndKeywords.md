@@ -1,4 +1,4 @@
-# Basic Control Structures in Fortran 90:
+# Basic Control Structures in Fortran 90
 
 Remarks and important hints with focus on minimally viable examples up to FORTRAN 90.
 
@@ -9,7 +9,6 @@ Sources:
 * http://www.cs.mtu.edu/~shene/COURSES/cs201/NOTES/F90-Control.pdf
 * http://www.obliquity.com/computer/fortran
 
-By Roland Siegbert (siegbert@cats.rwth-aachen.de)
 
 ## Versions of Fortran:
 
@@ -19,7 +18,7 @@ By Roland Siegbert (siegbert@cats.rwth-aachen.de)
 1958    FORTRAN II
 1958    FORTRAN III
 1962    FORTRAN IV    - still an important dialect
-1966    ANS FORTRAN   - ANSI standard FORTRAN IV (2 versions)
+1966    FORTRAN 66   - ANSI standard FORTRAN IV (2 versions)
 1977    FORTRAN 77
 1990    FORTRAN 90    <--- This document covers FORTRAN until here
 1997    FORTRAN 95
@@ -87,7 +86,7 @@ end select
 
 ## Loops:
 
-### do:
+### do: (can be labelled)
 
 ```
 do i=1,10
@@ -130,6 +129,6 @@ label CONTINUE
 `CONTINUE` - end current loop in `do` loop (can be labelled)
 `CYCLE` - end `do` at `end do`
 `RETURN` - leaves subroutine or function
-`PAUSE` -
-`READ n, list`
-`PUNCH n, list`
+`PAUSE` - deprecated
+`READ n, list` - deprecated
+`PUNCH n, list` - deprecated

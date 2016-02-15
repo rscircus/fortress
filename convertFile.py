@@ -14,16 +14,10 @@ import sys
 
 from CodeFile import *
 
-#########################################################################
-# Function to transform file                                            #
-#########################################################################
-
 def transformFile(oldFile, newFile):
+  """Return cleaned newFile from oldFile."""
   # read in file
   codeFile = CodeFile(oldFile, False, "REMARK")
-
-  # exchange with line above to ignore long lines
-  #codeFile = CodeFile(oldFile, False)
 
   # convert
   for codeLine in codeFile.codeLines:
@@ -55,10 +49,6 @@ def transformFile(oldFile, newFile):
 # Main program                                                          #
 #########################################################################
 
-## is a path given?
-#if len(sys.argv) < 2:
-#  print("Usage: " + sys.argv[0] + " oldpath newpath")
-
 # is a filename given?
 #if len(sys.argv) < 3:
 #  print("Usage: " + sys.argv[0] + " oldfile newfile")
@@ -67,11 +57,13 @@ def transformFile(oldFile, newFile):
 #newFile = sys.argv[2]
 
 if len(sys.argv) < 2:
+  print("Usage: " + sys.argv[0] + " file1.F file2.F ... fileN.F")
   exit()
 
 for file in sys.argv[1:]:
   print "Converting file '" + file + "'..."
   transformFile(file, file)
+
 
 # output status message
 #print("! created by " + sys.argv[0] + " from source file " + filename)

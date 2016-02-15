@@ -25,10 +25,8 @@ import re
 class CodeFile:
   """Class that represents a Fortran source code file"""
 
-  #######################################################################
-  # Function to read the source code from a file                        #
-  #######################################################################
   def __init__(self, fileName, isFreeForm, hint=""):
+    """Function to read the source code from a file."""
     # try to open file
     with open(fileName) as file:
       content = file.readlines()
@@ -41,13 +39,16 @@ class CodeFile:
     for line in content:
       self.codeLines.append(CodeLine(line, isFreeForm, hint))
 
-  #######################################################################
-  # Function to fix the indentation                                     #
-  #                                                                     #
-  # (This only makes sense in free-form code.)                          #
-  # (Continuations must be known.)                                      #
-  #######################################################################
   def fixIndentation(self, indent, contiIndent):
+    """Change the indentation of a codeLine.
+
+    Note:
+        This makes sense in free-form code only.
+
+    Args:
+      indent (int): new indent length
+
+    """
     curIndent = 0
     for codeLine in self.codeLines:
       if codeLine.decreasesIndentBefore():
@@ -66,23 +67,24 @@ class CodeFile:
     if curIndent > 0:
       self.codeLines[-1].remarks.append("Positive indentation level remaining.")
 
-  #######################################################################
-  # Function to check line length                                       #
-  #                                                                     #
-  # (This must be called right at the end.)                             #
-  #######################################################################
   def markLongLines(self, allowedLength):
+    """Mark lines above allowedLength.
+
+    Note:
+      Has to be called at the end.
+
+    """
     for codeLine in self.codeLines:
       if codeLine.getLength() > allowedLength:
         codeLine.remarks.append("Line above is longer than " + str(allowedLength) \
             + " characters.")
 
-  #######################################################################
-  # Look for old-style Doxygen blocks and transform them                #
-  #                                                                     #
-  # (This must be called after parsing and converting to free-form.)    #
-  #######################################################################
   def transformDoxygenBlocks(self, length):
+    """Look for old-style Doxygen blocks and transform them.
+
+    Note:
+      Call after parsing & free-form conversion.
+    """
     inBlock = False
     for codeLine in self.codeLines:
       if codeLine.comment.count("c") == 70:
@@ -123,13 +125,12 @@ class CodeFile:
         # or is it the description?
         codeLine.comment = "!> @brief " + codeLine.comment[3:].lstrip()
 
-  #######################################################################
-  # Function to search for continuations                                #
-  #                                                                     #
-  # (This must be called after parsing but before stripping             #
-  #  whitespaces at end and fixing indentation.)                        #
-  #######################################################################
   def identifyContinuations(self):
+    """Identify continuated lines.
+
+    Note:
+      Call before stripping whitespace and indent fix.
+    """
     # go through lines in reverse order
     inConti = False
     inTightConti = False
@@ -152,10 +153,8 @@ class CodeFile:
           codeLine.isTightContinuation = True
           inTightConti = True
 
-  #######################################################################
-  # Function to rebuild the source code from the lines                  #
-  #######################################################################
   def rebuild(self):
+    """Rebuild source CodeFile from CodeLines."""
     output = ""
 
     for codeLine in self.codeLines:
@@ -164,15 +163,9 @@ class CodeFile:
     return output
 
 
-#########################################################################
-# Class for source code representation                                  #
-#########################################################################
 class CodeLine:
   """Class that represents a Fortran source code line"""
 
-  #######################################################################
-  # Function to parse one line of source code                           #
-  #######################################################################
   def __init__(self, line, isFreeForm, hint):
     # initializations
     self.isFreeForm = isFreeForm
@@ -205,12 +198,13 @@ class CodeLine:
     self.isTightContinued = False
     self.isTightContinuation = False
 
-  #######################################################################
-  # Remove all tabs from line and replace by right amount of spaces     #
-  #                                                                     #
-  # (This function must be called BEFORE parsing.)                      #
-  #######################################################################
   def replaceTabs(self, tabLength):
+    """Remove all tabs from line and replace by right amount of spaces.
+
+    Note:
+      Call BEFORE parsing.
+
+    """
     # As long as the line contains tabs, find the first one ...
     tabPos = self.line.find("\t")
     while tabPos != -1:
@@ -221,10 +215,13 @@ class CodeLine:
       # Then find next one.
       tabPos = self.line.find("\t")
 
-  #######################################################################
-  # Parse the different parts of the line                               #
-  #######################################################################
   def parseLine(self):
+    """Parses a line and performs various checks.
+
+    Note:
+      The line is modified already by stripping away leading and trailing spaces.
+
+    """
     # first strip away any trailing whitespace
     match = re.match(r"(.*?)(\s+)$", self.line)
     if match:
@@ -294,31 +291,24 @@ class CodeLine:
     # record length of code in this line
     self.origCodeLength = len(self.code)
 
-  #######################################################################
-  # Check if line has code                                              #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def hasCode(self):
+    """Returns true if line has code."""
     if len(self.code):
       return True
     else:
       return False
 
-  #######################################################################
-  # Remove whitespace on the right side                                 #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def stripTrailingWhitespace(self):
+    """Remove trailing whitespace"""
     self.rightSpace = "\n"
 
-  #######################################################################
-  # Convert a line from fixed-form to free-form                         #
-  #                                                                     #
-  # (This function requires that continuations have been identified.)   #
-  #######################################################################
   def convertFixedToFree(self):
+    """Convert from fixed-form to free-form.
+
+    Note:
+      Continuations have be identified prior to this.
+
+    """
     if self.isFreeForm:
       return
     self.isFreeForm = True
@@ -346,34 +336,21 @@ class CodeLine:
     if self.isContinued:
       self.freeContEnd = "&" if self.isTightContinued else " &"
 
-  #######################################################################
-  # Prescribe an indentation for the line                               #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  # (This only makes sense in free-form.)                               #
-  #######################################################################
   def setIndentation(self, level, indent):
+    """Set correct multiple of indent to current line."""
     if self.hasCode() or len(self.comment):
       self.leftSpace = indent * level
     else:
       self.leftSpace = ""
 
-  #######################################################################
-  # Fix variable declarations                                           #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def fixDeclarationsInCode(self):
+    """Replaces real*8 with real(RK)"""
     # 'real*8' to 'real(RK)'
     self.code = re.sub(r"(?i)^\breal\b\s?\*\s?(\d+)\b", r"real(\1)", self.code)
     #self.code = re.sub(r"(?i)^\breal\b\s?\*\s?8\b", r"real(RK)", self.code)
 
-  #######################################################################
-  # Add spaces around operators and after commas                        #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def addSpacesInCode(self):
+    """Enhances readability by adding spaces between various operators."""
     # mark non-escaped quotation marks by an 'a' in front (this is arbitrary)
     marked = re.sub(r"([^\\]|^)(\")", r"\1a\2", self.code)
     # now split by 'a"'
@@ -427,12 +404,8 @@ class CodeLine:
     # put parts back together
     self.code = "\"".join(parts)
 
-  #######################################################################
-  # Find out if this line increases the indentation afterwards          #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def increasesIndentAfter(self):
+    """Identify level increasing indentation manipulators."""
     trans = self.code
 
     # remove double quoted strings
@@ -472,24 +445,16 @@ class CodeLine:
 
       return False
 
-  #######################################################################
-  # Find out if this line decreases the indentation before              #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def decreasesIndentBefore(self):
+    """Identify level decreasing indentation manipulators."""
     if re.match(r"(?i)(end(if|do|where)?|else(if)?)\b", self.code) \
         or re.match(r"(?i)case\b", self.code):
       return True
     else:
       return False
 
-  #######################################################################
-  # Unindent preprocessor commands                                      #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def unindentPreProc(self):
+    """Unindent preprocessor commands."""
     if len(self.preProc):
       self.preProc = "#" + self.preProc[1:].lstrip()
 
@@ -500,16 +465,22 @@ class CodeLine:
   #  continuations are identified.)                                     #
   #######################################################################
   def verifyContinuation(self):
+    """Returns true if line has Code.
+
+    TODO:
+      This is not necessary.
+    """
     if not self.hasCode():
       self.isContinuation = False
 
 
-  #######################################################################
-  # Swallow up length changes in space between code and comment         #
-  #                                                                     #
-  # (This function must be called after all code changes.)              #
-  #######################################################################
   def swallowLengthChange(self):
+    """Eliminates unecessary whitespace.
+
+    TODO:
+      Maybe one line of whitespace above comments makes sense.
+
+    """
     # if there is no comment, just return because there is no space to
     # change
     if not len(self.comment) or not self.hasCode():
@@ -523,31 +494,19 @@ class CodeLine:
     numLeftSpaces = max(1, len(self.midSpace) - lengthChange)
     self.midSpace = " " * numLeftSpaces
 
-  #######################################################################
-  # Rebuild line from parsed info                                       #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def buildFullLine(self):
+    """Returns string via CodeLine after all changes were performed."""
     return self.preProc + self.fixedComment + self.fixedLabel + self.fixedCont\
            + self.leftSpace + self.freeLabel + self.freeContBeg + self.code\
            + self.freeContEnd + self.midSpace + self.comment \
            + self.rightSpace
 
-  #######################################################################
-  # Return line length                                                  #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def getLength(self):
+    """Returns length of built line."""
     return len(self.buildFullLine()) - 1 # ignore line break
 
-  #######################################################################
-  # Rebuild line including remarks                                      #
-  #                                                                     #
-  # (This function must be called after parsing.)                       #
-  #######################################################################
   def rebuild(self):
+    """Returns file as string built from all CodeLines."""
     output = self.buildFullLine()
     for remark in self.remarks:
       output += "! " + self.hint + ": " + remark + "\n"

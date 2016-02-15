@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #########################################################################
-# This is a library to parse Fortran source files.
+# This is a library to lint and modernize Fortran source files.
 #
 # ToDo:
 # - Create some variables for regular expressions that are used multiple
@@ -19,9 +19,6 @@
 import sys
 import re
 
-#########################################################################
-# Class for source code representation                                  #
-#########################################################################
 class CodeFile:
   """Class that represents a Fortran source code file"""
 
@@ -458,12 +455,6 @@ class CodeLine:
     if len(self.preProc):
       self.preProc = "#" + self.preProc[1:].lstrip()
 
-  #######################################################################
-  # Function to make sure that continuation actually contains code      #
-  #                                                                     #
-  # (This function must be called after parsing and before              #
-  #  continuations are identified.)                                     #
-  #######################################################################
   def verifyContinuation(self):
     """Returns true if line has Code.
 

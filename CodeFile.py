@@ -2,7 +2,7 @@
 #########################################################################
 # This is a library to lint and modernize Fortran source files.
 #
-# ToDo:
+# TODO:
 # - Create some variables for regular expressions that are used multiple
 #   times.
 # - Currently, '&' signs at the endings of lines are not recognized as
@@ -12,6 +12,10 @@
 # - Operator matching usually does not work at beginnings or endings
 #   of parts.
 # - CodeStatement for (cont.) statement identification
+# - Split CodeLine into FreeLine and FixedLine
+# - Statements only in Free (after conversion)
+# - Move parseLine into constructor - DONE: 2016-02-16 Tue 10:30 @roland
+# - Reinsert execution position for functions (PARSE LINE?) @roland
 #
 # created by Florian Zwicke, Feb. 10, 2016
 #########################################################################

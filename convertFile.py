@@ -20,6 +20,7 @@ def transformFile(oldFile, newFile):
   codeFile = CodeFile(oldFile, False, "REMARK")
 
   # convert
+# TODO: Shift into CodeFile, s.t. codeLine can be arbitrary
   for codeLine in codeFile.codeLines:
     codeLine.replaceTabs(8)
     codeLine.parseLine()
@@ -30,6 +31,7 @@ def transformFile(oldFile, newFile):
 
   for codeLine in codeFile.codeLines:
     codeLine.convertFixedToFree()
+# TODO: Identify and automate Fixed vs. Free
     codeLine.addSpacesInCode()
     #codeLine.fixDeclarationsInCode()
     codeLine.swallowLengthChange()
@@ -58,6 +60,7 @@ def transformFile(oldFile, newFile):
 
 if len(sys.argv) < 2:
   print("Usage: " + sys.argv[0] + " file1.F file2.F ... fileN.F")
+  print("or " + sys.argv[0] + " *.F ")
   exit()
 
 for file in sys.argv[1:]:

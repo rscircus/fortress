@@ -2,7 +2,7 @@
 #########################################################################
 # This is a library to lint and modernize Fortran source files.
 #
-# ToDo:
+# TODO:
 # - Create some variables for regular expressions that are used multiple
 #   times.
 # - Currently, '&' signs at the endings of lines are not recognized as
@@ -12,6 +12,10 @@
 # - Operator matching usually does not work at beginnings or endings
 #   of parts.
 # - CodeStatement for (cont.) statement identification
+# - Split CodeLine into FreeLine and FixedLine
+# - Statements only in Free (after conversion)
+# - Move parseLine into constructor - DONE: 2016-02-16 Tue 10:30 @roland
+# - Reinsert execution position for functions (PARSE LINE?) @roland
 #
 # created by Florian Zwicke, Feb. 10, 2016
 #########################################################################
@@ -22,19 +26,36 @@ import re
 class CodeFile:
   """Class that represents a Fortran source code file"""
 
-  def __init__(self, fileName, isFreeForm, hint=""):
+  def __init__(self, fileName, isFreeForm, hint="", replaceTabs=True,
+               unindentPreProc=True):
     """Function to read the source code from a file."""
-    # try to open file
-    with open(fileName) as file:
-      content = file.readlines()
+    # try to open and read file
+    try:
+      with open(fileName) as file:
+        content = file.readlines()
+    except IOERROR:
+      print("Error: File inaccesible")
+      sys.exit(0)
 
     # do initializations
     self.codeLines = []
-    self.hint = hint
+    self.fileName = fileName
 
-    # go through lines and parse
+    # parse and clean up already
     for line in content:
-      self.codeLines.append(CodeLine(line, isFreeForm, hint))
+      cLine = CodeLine(line, isFreeForm, hint)
+
+      # Replace tabs with spaces (args: amount of spaces)
+      if replaceTabs:
+        cLine.replaceTabs(8)
+      cLine.parseLine()
+
+      # Unindent preprocessor directives
+      if unindentPreProc:
+        cLine.unindentPreProc()
+      self.codeLines.append(cLine)
+
+    self.identifyContinuations()
 
   def fixIndentation(self, indent, contiIndent):
     """Change the indentation of a codeLine.
@@ -60,6 +81,8 @@ class CodeFile:
       if codeLine.increasesIndentAfter():
         curIndent += 1
 
+      codeLine.preserveCommentPosition()
+
     # back at zero indentation?
     if curIndent > 0:
       self.codeLines[-1].remarks.append("Positive indentation level remaining.")
@@ -81,6 +104,7 @@ class CodeFile:
 
     Note:
       Call after parsing & free-form conversion.
+
     """
     inBlock = False
     for codeLine in self.codeLines:
@@ -127,6 +151,7 @@ class CodeFile:
 
     Note:
       Call before stripping whitespace and indent fix.
+
     """
     # go through lines in reverse order
     inConti = False
@@ -136,7 +161,7 @@ class CodeFile:
       if codeLine.hasCode() and inConti:
         codeLine.isContinued = True
         # is it a 'tight' continuation?
-        if inTightConti and not len(codeLine.midSpace) \
+        if inTightConti and not len(codeLine.commentSpace) \
             and len(codeLine.rightSpace) == 1:
           codeLine.isTightContinued = True
         inConti = False
@@ -150,14 +175,17 @@ class CodeFile:
           codeLine.isTightContinuation = True
           inTightConti = True
 
-  def rebuild(self):
-    """Rebuild source CodeFile from CodeLines."""
+  def write(self):
+    """Rebuild & write source CodeFile from CodeLines."""
     output = ""
 
     for codeLine in self.codeLines:
       output += codeLine.rebuild()
 
-    return output
+    # output file
+    fOut = open(self.fileName, "w")
+    fOut.write(output)
+    fOut.close()
 
 
 class CodeLine:
@@ -175,7 +203,7 @@ class CodeLine:
     self.preProc = ""
     self.leftSpace = ""
     self.code = ""
-    self.midSpace = ""
+    self.commentSpace = ""
     self.comment = ""
     self.rightSpace = ""
 
@@ -262,7 +290,7 @@ class CodeLine:
     match = re.match(r"((?:[^!'\"]|\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')*?)(\s*)(!.*?)$", \
         self.line)
     if match:
-      self.midSpace = match.group(2)
+      self.commentSpace = match.group(2)
       self.comment = match.group(3)
       self.line = match.group(1)
 
@@ -274,12 +302,20 @@ class CodeLine:
         self.freeLabel = match.group(1)
         self.line = match.group(2)
 
-      # check for continuation
+      # TODO: tight (no spaces) freeContXXX > 1
+      # check for continuation start
       match = re.match(r"(&\s*)(.*?)$", self.line)
       if match:
         self.freeContBeg = match.group(1)
         self.isContinuation = True
         self.line = match.group(2)
+
+      # check for continuation end
+      match = re.match(r"(.*?)(\s*&)$", self.line)
+      if match:
+        self.freeContEnd = match.group(2)
+        self.isContinued = True
+        self.line = match.group(1)
 
     # finished
     self.code = self.line
@@ -455,41 +491,28 @@ class CodeLine:
     if len(self.preProc):
       self.preProc = "#" + self.preProc[1:].lstrip()
 
-  def verifyContinuation(self):
-    """Returns true if line has Code.
-
-    TODO:
-      This is not necessary.
-    """
-    if not self.hasCode():
-      self.isContinuation = False
-
-
-  def swallowLengthChange(self):
-    """Eliminates unecessary whitespace.
-
-    TODO:
-      Maybe one line of whitespace above comments makes sense.
-
-    """
+  def preserveCommentPosition(self):
+    """Move comment to same position after indentation changes."""
     # if there is no comment, just return because there is no space to
     # change
     if not len(self.comment) or not self.hasCode():
       return
 
     lengthChange = len(self.code) - self.origCodeLength
+
     # no change for no length change
     if not lengthChange:
       return
+
     # at least one space must remain
-    numLeftSpaces = max(1, len(self.midSpace) - lengthChange)
-    self.midSpace = " " * numLeftSpaces
+    numLeftSpaces = max(1, len(self.commentSpace) - lengthChange)
+    self.commentSpace = " " * numLeftSpaces
 
   def buildFullLine(self):
     """Returns string via CodeLine after all changes were performed."""
     return self.preProc + self.fixedComment + self.fixedLabel + self.fixedCont\
            + self.leftSpace + self.freeLabel + self.freeContBeg + self.code\
-           + self.freeContEnd + self.midSpace + self.comment \
+           + self.freeContEnd + self.commentSpace + self.comment \
            + self.rightSpace
 
   def getLength(self):

@@ -17,22 +17,15 @@ from CodeFile import *
 def transformFile(oldFile, newFile):
   """Return cleaned newFile from oldFile."""
   # read in file
-  codeFile = CodeFile(oldFile, False, "REMARK")
+  # args: fileName, isFreeForm, hint="", replaceTabs=True, unindentPreProc=True
+  codeFile = CodeFile(oldFile, isFreeForm=True, hint="REMARK")
 
-  # convert
+# TODO: Shift into CodeFile, s.t. codeLine can be arbitrary
   for codeLine in codeFile.codeLines:
-    codeLine.replaceTabs(8)
-    codeLine.parseLine()
-    codeLine.unindentPreProc()
-    codeLine.verifyContinuation()
-
-  codeFile.identifyContinuations()
-
-  for codeLine in codeFile.codeLines:
-    codeLine.convertFixedToFree()
+# TODO: Identify and automate Fixed vs. Free
+    #codeLine.convertFixedToFree()
     codeLine.addSpacesInCode()
     #codeLine.fixDeclarationsInCode()
-    codeLine.swallowLengthChange()
     codeLine.stripTrailingWhitespace()
 
   # converter control
@@ -41,9 +34,7 @@ def transformFile(oldFile, newFile):
   codeFile.markLongLines(100)
 
   # output file
-  fOut = open(newFile, "w")
-  fOut.write(codeFile.rebuild())
-  fOut.close()
+  codeFile.write()
 
 #########################################################################
 # Main program                                                          #
@@ -58,6 +49,7 @@ def transformFile(oldFile, newFile):
 
 if len(sys.argv) < 2:
   print("Usage: " + sys.argv[0] + " file1.F file2.F ... fileN.F")
+  print("or " + sys.argv[0] + " *.F ")
   exit()
 
 for file in sys.argv[1:]:

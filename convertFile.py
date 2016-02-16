@@ -30,7 +30,6 @@ def transformFile(oldFile, newFile):
 
   # converter control
   codeFile.fixIndentation("    ", 2)
-  #codeFile.transformDoxygenBlocks(100)
   codeFile.markLongLines(100)
 
   # output file

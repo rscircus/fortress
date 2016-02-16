@@ -99,53 +99,6 @@ class CodeFile:
         codeLine.remarks.append("Line above is longer than " + str(allowedLength) \
             + " characters.")
 
-  def transformDoxygenBlocks(self, length):
-    """Look for old-style Doxygen blocks and transform them.
-
-    Note:
-      Call after parsing & free-form conversion.
-
-    """
-    inBlock = False
-    for codeLine in self.codeLines:
-      if codeLine.comment.count("c") == 70:
-        inBlock = not inBlock
-        codeLine.comment = "!" + "-" * (length - 1)
-        continue
-
-      if inBlock:
-        # is it many dashes?
-        if codeLine.comment.count("-") == 60:
-          codeLine.comment = "!>"
-          continue
-
-        # is it the filename?
-        match = re.match(r"!\s(\S+\.\S+)\s+c$", codeLine.comment)
-        if match:
-          codeLine.comment = "!> @file " + match.group(1)
-          continue
-
-        # is it a param?
-        match = re.match(r"!\s>\s+\\(param.*?)$", codeLine.comment)
-        if match:
-          codeLine.comment = "!> @" + match.group(1)
-          continue
-
-        # is it a date?
-        match = re.match(r"!\s(\d{4}\.\d{2}\.\d{2})\s-\s(.*?)\s+c$", codeLine.comment)
-        if match:
-          codeLine.comment = "!> @date " + match.group(1) + " -- " + match.group(2)
-          continue
-
-        # is it a mail address?
-        match = re.match(r"!\s(.*?)\s\[(.*?@.*?\..*?)\]\s+c$", codeLine.comment)
-        if match:
-          codeLine.comment = "!> @authors " + match.group(1) + " <" + match.group(2) + ">"
-          continue
-
-        # or is it the description?
-        codeLine.comment = "!> @brief " + codeLine.comment[3:].lstrip()
-
   def identifyContinuations(self):
     """Identify continuated lines.
 

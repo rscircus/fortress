@@ -16,6 +16,8 @@
 # - Statements only in Free (after conversion)
 # - Move parseLine into constructor - DONE: 2016-02-16 Tue 10:30 @roland
 # - Reinsert execution position for functions (PARSE LINE?) @roland
+# - Note that the ampersand at the beginning of lines is optional
+# - in free-form. This is currently not supported by this script.
 #
 # created by Florian Zwicke, Feb. 10, 2016
 #########################################################################

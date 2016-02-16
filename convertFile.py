@@ -35,6 +35,10 @@ def transformFile(oldFile, newFile):
   # output file
   codeFile.write()
 
+  # lint file in the end
+  codeLint = codeLinter(oldFile)
+  codeLint.lint()
+
 #########################################################################
 # Main program                                                          #
 #########################################################################

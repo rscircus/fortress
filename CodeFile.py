@@ -22,6 +22,7 @@
 
 import sys
 import re
+import subprocess
 
 class CodeFile:
   """Class that represents a Fortran source code file"""
@@ -478,3 +479,30 @@ class CodeLine:
     for remark in self.remarks:
       output += "! " + self.hint + ": " + remark + "\n"
     return output
+
+class codeLinter:
+  """Use gfortran as linter"""
+  def __init__(self, fileName):
+
+    self.linter = "gfortran"
+    self.fileName = fileName
+
+  def lint(self):
+    p = subprocess.Popen([self.linter, '-fsyntax-only', '-Wall', '-Wextra', self.fileName],
+                         stdout = subprocess.PIPE,
+                         stderr = subprocess.PIPE,
+                         stdin  = subprocess.PIPE)
+
+    # adding group names in Python style here => better identification
+    catchRe = "(.+):(?P<line>\\d+):(?P<col>\\d+):((.|\\n)*)(?P<type>(Error|Warning|Note)):\\s*(?P<message>.*)"
+
+    # execute linter:
+    stdOut, stdErr = p.communicate()
+    caughtIter = re.finditer(catchRe, stdErr)
+
+    # print errors:
+    for el in caughtIter:
+      print "Line:      " + el.group('line')
+      print "Column:    " + el.group('col')
+      print "Errortype: " + el.group('type')
+      print "Message:   " + el.group('message')

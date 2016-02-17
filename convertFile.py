@@ -20,36 +20,29 @@ from CodeFile import *
 
 def transformFile(oldFile, newFile):
   # read in file
-  codeFile = CodeFile(oldFile, False, "REMARK")
+  # args: fileName, isFreeForm, hint="", replaceTabs=True, unindentPreProc=True
+  codeFile = CodeFile(oldFile, isFreeForm=True, hint="REMARK")
 
   # exchange with line above to disable output of warnings
   #codeFile = CodeFile(oldFile, False)
 
   # convert
   for codeLine in codeFile.codeLines:
-    codeLine.replaceTabs(8)
-    codeLine.parseLine()
-    codeLine.unindentPreProc()
-    codeLine.verifyContinuation()
-
-  codeFile.identifyContinuations()
-
-  for codeLine in codeFile.codeLines:
     codeLine.convertFixedToFree()
     codeLine.addSpacesInCode()
     #codeLine.fixDeclarationsInCode()
-    codeLine.swallowLengthChange()
     codeLine.stripTrailingWhitespace()
 
   # converter control
   codeFile.fixIndentation("    ", 2)
-  #codeFile.transformDoxygenBlocks(100)
   codeFile.markLongLines(100)
 
   # output file
-  fOut = open(newFile, "w")
-  fOut.write(codeFile.rebuild())
-  fOut.close()
+  codeFile.write()
+
+  # lint file in the end
+  codeLint = codeLinter(oldFile)
+  codeLint.lint()
 
 #########################################################################
 # Main program                                                          #

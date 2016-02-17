@@ -1,4 +1,4 @@
-FORTRAN CodeCleaner and Linter
+# FORTRAN CodeCleaner and Linter
 
 Cleans archaic Fortran code.
 

@@ -14,46 +14,41 @@ import sys
 
 from CodeFile import *
 
-#########################################################################
-# Function to transform file                                            #
-#########################################################################
-
 def transformFile(oldFile, newFile):
+  """Return cleaned newFile from oldFile."""
   # read in file
-  codeFile = CodeFile(oldFile, False, "REMARK")
+  # args: fileName, isFreeForm, hint="", replaceTabs=True, unindentPreProc=True
+  codeFile = CodeFile(oldFile, isFreeForm=True, hint="REMARK")
 
-  # exchange with line above to disable output of warnings
-  #codeFile = CodeFile(oldFile, False)
-
-  # convert
+# TODO: Shift into CodeFile, s.t. codeLine can be arbitrary
   for codeLine in codeFile.codeLines:
-    codeLine.replaceTabs(8)
-    codeLine.parseLine()
-    codeLine.unindentPreProc()
-    codeLine.verifyContinuation()
-
-  codeFile.identifyContinuations()
-
-  for codeLine in codeFile.codeLines:
-    codeLine.convertFixedToFree()
+# TODO: Identify and automate Fixed vs. Free
+    #codeLine.convertFixedToFree()
     codeLine.addSpacesInCode()
     #codeLine.fixDeclarationsInCode()
-    codeLine.swallowLengthChange()
     codeLine.stripTrailingWhitespace()
 
   # converter control
   codeFile.fixIndentation("    ", 2)
-  #codeFile.transformDoxygenBlocks(100)
   codeFile.markLongLines(100)
 
   # output file
-  fOut = open(newFile, "w")
-  fOut.write(codeFile.rebuild())
-  fOut.close()
+  codeFile.write()
+
+  # lint file in the end
+  codeLint = codeLinter(oldFile)
+  codeLint.lint()
 
 #########################################################################
 # Main program                                                          #
 #########################################################################
+
+# is a filename given?
+#if len(sys.argv) < 3:
+#  print("Usage: " + sys.argv[0] + " oldfile newfile")
+#  exit()
+#oldFile = sys.argv[1]
+#newFile = sys.argv[2]
 
 if len(sys.argv) < 2:
   print("Usage: " + sys.argv[0] + " file1.F file2.F ... fileN.F")
@@ -63,3 +58,8 @@ if len(sys.argv) < 2:
 for file in sys.argv[1:]:
   print "Converting file '" + file + "'..."
   transformFile(file, file)
+
+
+# output status message
+#print("! created by " + sys.argv[0] + " from source file " + filename)
+#print("! on " + time.strftime("%c"))

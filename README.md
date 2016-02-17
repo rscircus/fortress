@@ -2,6 +2,7 @@
 
 Cleans archaic Fortran code.
 
+
 ## Features:
 
 * Convert fixed form code to free form code
@@ -19,13 +20,15 @@ Cleans archaic Fortran code.
 ./convertFile.py *.F
 ```
 
+
 ## Changelog:
 
 ### 2016.02.17
 Added:
 - README.md
+- TODO.md
 
-Added:
+Imported:
 - Import original project from Florian Z's repo.
 
 

@@ -24,6 +24,9 @@ Cleans archaic Fortran code.
 ## Changelog:
 
 ### 2016.02.17
+Changed:
+- Structure. Everything in `./src` now.
+
 Added:
 - README.md
 - TODO.md

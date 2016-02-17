@@ -1,6 +1,9 @@
 # TODO
 
-## CodeFile.py
+* Attach filter structure
+* Generalize codeline
+
+## src/codefile.py
 
 ```
 261:# TODO: tight (no spaces) freeContXXX > 1

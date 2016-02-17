@@ -11,8 +11,8 @@
 
 import time
 import sys
-
-from CodeFile import *
+from src.codefile import codefile
+from src.codelinter import codelinter
 
 #########################################################################
 # Function to transform file                                            #
@@ -21,7 +21,7 @@ from CodeFile import *
 def transformFile(oldFile, newFile):
   # read in file
   # args: fileName, isFreeForm, hint="", replaceTabs=True, unindentPreProc=True
-  codeFile = CodeFile(oldFile, isFreeForm=True, hint="REMARK")
+  codeFile = codefile(oldFile, isFreeForm=True, hint="REMARK")
 
   # exchange with line above to disable output of warnings
   #codeFile = CodeFile(oldFile, False)
@@ -41,7 +41,7 @@ def transformFile(oldFile, newFile):
   codeFile.write()
 
   # lint file in the end
-  codeLint = codeLinter(oldFile)
+  codeLint = codelinter(oldFile)
   codeLint.lint()
 
 #########################################################################

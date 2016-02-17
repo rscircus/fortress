@@ -1,30 +1,38 @@
-#!/usr/bin/env python
-#########################################################################
-# This is a library to lint and modernize Fortran source files.
-#
-# TODO:
-# - Create some variables for regular expressions that are used multiple
-#   times.
-# - Currently, '&' signs at the endings of lines are not recognized as
-#   continued line when parsing free-form code.
-# - Check if statement checks for indentation are complete.
-# - Check if 'where' statements are matched correctly.
-# - Operator matching usually does not work at beginnings or endings
-#   of parts.
-# - CodeStatement for (cont.) statement identification
-# - Split CodeLine into FreeLine and FixedLine
-# - Statements only in Free (after conversion)
-# - Move parseLine into constructor - DONE: 2016-02-16 Tue 10:30 @roland
-# - Reinsert execution position for functions (PARSE LINE?) @roland
-# - Note that the ampersand at the beginning of lines is optional
-# - in free-form. This is currently not supported by this script.
-#
-# created by Florian Zwicke, Feb. 10, 2016
-#########################################################################
+#!/usr/bin/env python2
+"""This is a library to lint and modernize Fortran source files.
 
+Note:
+  Needs some kind of front end.
+
+Todo:
+  - Create some variables for regular expressions that are used multiple
+    times.
+  - Currently, '&' signs at the endings of lines are not recognized as
+    continued line when parsing free-form code.
+  - Check if statement checks for indentation are complete.
+  - Check if 'where' statements are matched correctly.
+  - Operator matching usually does not work at beginnings or endings
+    of parts.
+  - CodeStatement for (cont.) statement identification
+  - Split CodeLine into FreeLine and FixedLine
+  - Statements only in Free (after conversion)
+  - Move parseLine into constructor - DONE: 2016-02-16 Tue 10:30 @roland
+  - Reinsert execution position for functions (PARSE LINE?) @roland
+  - Note that the ampersand at the beginning of lines is optional
+  - in free-form. This is currently not supported by this script.
+  - codeFile is too big, split of subtasks.
+"""
+
+__date__    = "$Date: 2016/02/17 $"
+__license__ = "MIT" # Flo?
+__authors__ = [
+    "Florian Zwicke <z@zwicke.org>",
+    "Roland Siegbert <r@rscircus.org>"
+    ]
+
+import subprocess
 import sys
 import re
-import subprocess
 
 class CodeFile:
   """Class that represents a Fortran source code file"""
@@ -387,6 +395,7 @@ class CodeLine:
       # '.eq.', ...
       #part = re.sub(r"(?i)(\S)(\.(?:eq|ne|lt|gt|le|ge|and|or)\.)", r"\1 \2", part)
       #part = re.sub(r"(?i)(\.(?:eq|ne|lt|gt|le|ge|and|or)\.)(\S)", r"\1 \2", part)
+# TODO: Replace with 'modern' rel. op.
 
       parts[i] = part
 
@@ -490,10 +499,14 @@ class codeLinter:
     self.fileName = fileName
 
   def lint(self):
-    p = subprocess.Popen([self.linter, '-fsyntax-only', '-Wall', '-Wextra', self.fileName],
-                         stdout = subprocess.PIPE,
-                         stderr = subprocess.PIPE,
-                         stdin  = subprocess.PIPE)
+    p = subprocess.Popen([self.linter,
+                          '-fsyntax-only',  # perform syntax checks only
+                          '-Wall',          # print all warnings
+                          '-Wextra',
+                          self.fileName],
+                          stdout = subprocess.PIPE,
+                          stderr = subprocess.PIPE,
+                          stdin  = subprocess.PIPE)
 
     # adding group names in Python style here => better identification
     catchRe = "(.+):(?P<line>\\d+):(?P<col>\\d+):((.|\\n)*)(?P<type>(Error|Warning|Note)):\\s*(?P<message>.*)"

@@ -92,8 +92,7 @@ class Reformatter:
                 codeLine.remarks.append("Negative indentation level reached.")
                 curIndent = 0
 
-            codeLine.setIndentation(curIndent + \
-                                    (contiIndent if codeLine.isContinuation else 0), indent)
+            codeLine.setIndentation(curIndent + (contiIndent if codeLine.isContinuation else 0), indent*" ")
 
             if codeLine.increasesIndentAfter():
                 curIndent += 1

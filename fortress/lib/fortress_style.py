@@ -25,6 +25,7 @@ def CreateSaneStyle():
     REPLACE_TABS_BY_SPACES=True,
     CONVERT_FIXED_TO_FREE=True,
     READABLE_PARENTHESES=True,
+    FIX_LINE_ENDINGS=True
   )
 
 # And CATS :-D

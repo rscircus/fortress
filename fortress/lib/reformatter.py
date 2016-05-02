@@ -29,6 +29,9 @@ class Reformatter:
         self.codeLines = []
         self.isFreeForm = False  # TODO
 
+        if fortress_style.Get('FIX_LINE_ENDINGS'):
+            unwrapped_source.replace(r"\r\n", r"\n")
+
         lineno = 0
         # tokenize and clean up already
         for line in unwrapped_source.split("\n"):
@@ -67,6 +70,7 @@ class Reformatter:
         # Reindents the code(block):
         self.fixIndentation("    ", 2)
         self.markLongLines(100)
+
 
     def fixIndentation(self, indent, contiIndent):
         """Change the indentation of a codeLine.

@@ -154,10 +154,6 @@ class UnwrappedLine:
     else:
       return False
 
-  def stripTrailingWhitespace(self):
-    """Remove trailing whitespace"""
-    self.rightSpace = "\n"
-
   def convertFixedToFree(self):
     """Convert from fixed-form to free-form.
 

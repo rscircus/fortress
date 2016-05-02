@@ -66,7 +66,6 @@ class Reformatter:
                 codeLine.convertFixedToFree()
             if fortress_style.Get('READABLE_PARENTHESES'):
                 codeLine.addSpacesInCode()
-            codeLine.stripTrailingWhitespace()
 
         # Reindents the code(block):
         self.fixIndentation("    ", 2)

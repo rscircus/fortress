@@ -44,7 +44,7 @@ def GetCommandLineFiles(command_line_file_list, recursive, exclude):
 def IsFortranOrHeaderFile(filename, headers_too=True):
   """Return True if filename is a Fortran file."""
   if headers_too:
-    if os.path.splitext(filename)[1] in ['.F','.F90','.f','f90','h']:
+    if os.path.splitext(filename)[1] in ['.F','.F90','.f','f90','h']: # TODO: This can be dangerous. Esp. when it's a C-header.
       return True
   elif os.path.splitext(filename)[1] in ['.F','.F90','.f','f90']:
     return True

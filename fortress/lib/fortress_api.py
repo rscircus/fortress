@@ -32,10 +32,11 @@ def FormatFile(filename,
                print_diff=False,
                in_place=False,
                logger=None):
-  """Format a single Python file and return the formatted code.
+  """Format a single Fortran file and return the formatted code.
 
   Arguments:
     filename  : (unicode) The file to reformat.
+    lines     : (tuple) Lines to reformat
     in_place  : (bool) If True, write the reformatted code back to the file.
     logger    : (io streamer) A stream to output logging.
     remaining : see comment at the top of this module.
@@ -56,8 +57,7 @@ def FormatFile(filename,
 
   original_source, encoding = ReadFile(filename, logger)
 
-  fortress_style.SetGlobalStyle(fortress_style.CreateSaneStyle())
-
+  # Reformat code:
   reformatted_source, changed = FormatCode(original_source,
                                            filename=filename,
                                            lines=lines,
@@ -92,12 +92,16 @@ def FormatCode(unformatted_source,
 
   if not unformatted_source.endswith('\n'):
     unformatted_source += '\n'
+
+  # Reformat:
   Reform = reformatter.Reformatter(unformatted_source, lines)
+  Reform.reformat()
   reformatted_source = Reform.generateCodeLines()
 
   if unformatted_source == reformatted_source:
     return '' if print_diff else reformatted_source, False
 
+  # Diff:
   code_diff = _GetUnifiedDiff(unformatted_source,
                               reformatted_source,
                               filename=filename)
@@ -167,9 +171,9 @@ def _GetUnifiedDiff(before, after, filename='code'):
                                         lineterm='')) + '\n'
 
 def _CheckPythonVersion():
-  errmsg = 'FORTRESS is only supported by Python 2.7 or 3.4+'
+  errmsg = 'FORTRESS is only supported by Python 2.6 or 3.4+'
   if sys.version_info[0] == 2:
-    if sys.version_info[1] < 7:
+    if sys.version_info[1] < 6:
       raise RuntimeError(errmsg)
   elif sys.version_info[0] == 3:
     if sys.version_info[1] < 4:

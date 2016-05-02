@@ -15,6 +15,7 @@ import textwrap
 from fortress.lib import fortress_api
 from fortress.lib import file_resources
 from fortress.lib import py3compat
+from fortress.lib import fortress_style
 
 __version__ = '0.2'
 __authors__ = [
@@ -80,6 +81,13 @@ def main(argv):
                       default=None,
                       help='patterns for files to exclude from formatting')
 
+# TODO: Idea: Can be set as default if style.ini is present.
+  parser.add_argument('-s',
+                      '--style',
+                      action='store',
+                      default=None,
+                      help='specify formatting style via local style.ini')
+
   parser.add_argument('-t',
                       '--lint',
                       action='store_true',
@@ -101,6 +109,13 @@ def main(argv):
 
   lines = getLines(args.lines) if args.lines is not None else None
 
+# -s: Style file provided
+  if args.style:
+      fortress_style.SetGlobalStyle(fortress_style.CreateStyleFromConfig(args.style))
+  else:
+      fortress_style.SetGlobalStyle(fortress_style.CreateFortran2003Style())
+
+
 # Lines case:
   if not args.files:
     if args.in_place or args.diff:
@@ -117,7 +132,6 @@ def main(argv):
       except EOFError:
         break
 
-# TODO: Setup style?
     reformatted_source, changed = fortress_api.FormatCode(
           py3compat.unicode('\n'.join(original_source) + '\n'),
           filename='<stdin>',
@@ -128,7 +142,7 @@ def main(argv):
 
     return 2 if changed else 0
 
-# TODO: Catch files
+# Recursive or file list case:
   files = file_resources.GetCommandLineFiles(args.files,
                                              args.recursive,
                                              args.exclude)
@@ -164,7 +178,10 @@ def getLines(line_strings):
   return lines
 
 
-def FormatFiles(filenames, lines, in_place=False, print_diff=False):
+def FormatFiles(filenames,
+                lines,
+                in_place=False,
+                print_diff=False):
   """Format a list of files.
 
   Arguments:

@@ -27,7 +27,7 @@ class Reformatter:
 
         # do initializations
         self.codeLines = []
-        self.isFreeForm = False  # TODO
+        self.isFreeForm = not fortress_style.Get('CONVERT_FIXED_TO_FREE')
 
         if fortress_style.Get('FIX_LINE_ENDINGS'):
             unwrapped_source.replace(r"\r\n", r"\n") # Windows

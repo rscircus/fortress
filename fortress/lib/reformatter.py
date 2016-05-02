@@ -64,12 +64,14 @@ class Reformatter:
         for codeLine in self.codeLines:
             if fortress_style.Get('CONVERT_FIXED_TO_FREE'):
                 codeLine.convertFixedToFree()
-            if fortress_style.Get('READABLE_PARENTHESES'):
+            if fortress_style.Get('ADD_SPACES_AROUND_OPERATORS'):
                 codeLine.addSpacesInCode()
 
         # Reindents the code(block):
-        self.fixIndentation("    ", 2)
-        self.markLongLines(100)
+        if fortress_style.Get('REINDENT'):
+            self.fixIndentation(fortress_style.Get('INDENT_WIDTH'), fortress_style.Get('CONTI_INDENT_WIDTH'))
+        if fortress_style.Get('ADD_REMARKS'):
+            self.markLongLines(100)
 
 
     def fixIndentation(self, indent, contiIndent):

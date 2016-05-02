@@ -30,7 +30,8 @@ class Reformatter:
         self.isFreeForm = False  # TODO
 
         if fortress_style.Get('FIX_LINE_ENDINGS'):
-            unwrapped_source.replace(r"\r\n", r"\n")
+            unwrapped_source.replace(r"\r\n", r"\n") # Windows
+            unwrapped_source.replace(r"\r", r"\n")   # Mac OS
 
         lineno = 0
         # tokenize and clean up already

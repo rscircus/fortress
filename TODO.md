@@ -1,5 +1,4 @@
 # TODO
-  * Clean up line endings: convert any '\r\n' or '\r' to '\n'
   * Attach filter structure
   * Generalize codeline
 

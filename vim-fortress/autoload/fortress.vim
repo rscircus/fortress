@@ -1,16 +1,15 @@
 " VIM Autoload script for FORTRESS support
 "
-" Author: roland@siegbert.info
+" Author: r@rscircus.org
 "
-" Put this file into your ~/.vim/autoload directory. Or the snippet below into
-" your ~/.vimrc
+" Put this file into your ~/.vim/autoload directory.
 "
 " You can use mappings like:
 "
-"    map <C-F> :call fortress()<cr>
-"    imap <C-F> <C-O>:call fortress()<cr>
+"    map <C-F> :call fortress#format()<cr>
+"    imap <C-F> <C-O>:call fortress#format()<cr>
 "
-function! fortress() range
+function! fortress#format() range
   " Determine range to format.
   let l:line_ranges = a:firstline . '-' . a:lastline
   let l:cmd = 'fortress --lines=' . l:line_ranges

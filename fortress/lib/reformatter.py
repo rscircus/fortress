@@ -145,12 +145,13 @@ class Reformatter:
                     codeLine.isTightContinuation = True
                     inTightConti = True
 
+
     def generateCodeLines(self):
         """Generate a string from the codelines"""
         output = ""
         for cLine in self.codeLines:
             if cLine.enabled:
-                output += cLine.rebuild() + "\n"
+                output += cLine.rebuild().rstrip() + "\n"
             else:
-                output += cLine.origLine +"\n"
+                output += cLine.origLine.rstrip() +"\n"
         return output

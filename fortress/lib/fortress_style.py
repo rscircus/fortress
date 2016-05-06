@@ -29,11 +29,24 @@ def CreateFortran2003Style():
     REINDENT=False
   )
 
+def CreateStrictStyle():
+  return dict(
+    INDENT_WIDTH=4,
+    CONTI_INDENT_WIDTH=4,
+    UNINDENT_PREPROCESSOR_DIRECTIVES=True,
+    REPLACE_TABS_BY_SPACES=True,
+    CONVERT_FIXED_TO_FREE=False,
+    ADD_SPACES_AROUND_OPERATORS=True,
+    FIX_LINE_ENDINGS=True,
+    ADD_REMARKS=False,
+    REINDENT=True
+  )
+
 def CreateStyleFromConfig(config_filename):
   """Read the style.ini and return style based on Fortran2003 std."""
 
   # Initialize base style:
-  style = CreateFortran2003Style()
+  style = CreateStrictStyle()
 
   # Provide meaningful error here.
   if not os.path.exists(config_filename):

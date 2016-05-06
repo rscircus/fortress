@@ -88,6 +88,10 @@ def main(argv):
                       default=None,
                       help='specify formatting style via local style.ini')
 
+  parser.add_argument('--strict',
+                      action='store_true',
+                      help='applies all available formatting options / style.ini will be ignored')
+
   parser.add_argument('-t',
                       '--lint',
                       action='store_true',
@@ -110,9 +114,12 @@ def main(argv):
   lines = getLines(args.lines) if args.lines is not None else None
 
 # -s: Style file provided
-  if args.style:
-      fortress_style.SetGlobalStyle(fortress_style.CreateStyleFromConfig(args.style))
+  if args.strict:
+    fortress_style.SetGlobalStyle(fortress_style.CreateStrictStyle())
   else:
+    if args.style:
+      fortress_style.SetGlobalStyle(fortress_style.CreateStyleFromConfig(args.style))
+    else:
       fortress_style.SetGlobalStyle(fortress_style.CreateFortran2003Style())
 
 

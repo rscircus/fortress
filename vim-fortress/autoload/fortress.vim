@@ -6,13 +6,14 @@
 "
 " You can use mappings like:
 "
-"    map <C-F> :call fortress#format()<cr>
-"    imap <C-F> <C-O>:call fortress#format()<cr>
+"    This one uses the style.ini in the local dir from which vim was started in:
+"    map <leader>ff :call fortress#format()<cr>
+"    imap <leader>ff :call fortress#format()<cr>
 "
 function! fortress#format() range
   " Determine range to format.
   let l:line_ranges = a:firstline . '-' . a:lastline
-  let l:cmd = 'fortress --lines=' . l:line_ranges
+  let l:cmd = 'fortress -l ' . l:line_ranges . ' -s style.ini'
 
   " Call fortress with the current buffer
   let l:formatted_text = system(l:cmd, join(getline(1, '$'), "\n") . "\n")

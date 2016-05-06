@@ -97,8 +97,8 @@ class UnwrappedLine:
         self.fixedLabel = match.group(1)
         self.line = match.group(2)
       # otherwise check for continuation
-      # TODO: Does it mean, there is a & in [5] here?
-      elif len(self.line) > 5 and self.line[0] != "\t" and self.line[5] not in [' ', '0']:
+      #elif len(self.line) > 5 and self.line[0] != "\t" and self.line[5] not in [' ', '0']:
+      elif len(self.line) > 5 and self.line[5] == "&":
         self.fixedCont = self.line[:6]
         self.isContinuation = True
         self.line = self.line[6:]

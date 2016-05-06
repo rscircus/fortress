@@ -9,14 +9,33 @@ Cleans archaic Fortran code.
 * Tab -> Space conversion
 * Add spaces around/behind operators and typical structures
 * Strip trailing whitespace
-* Clean up Doxygen headers
+* Easily pluggable (vim-plugin inside)
+
+
+## Planned Features:
+
 * Lint using `gfortran` as backend
+
+
+## Installation:
+
+On your local machine, this should work:
+
+```
+python setup.py install
+```
+
+Working on a cluster or remote without any rights, a more fine grained approach:
+
+```
+python setup.py install --user --record install.txt
+```
 
 
 ## Usage:
 
 ```
-> fortress                                                                                                                                                                                             master ~/src/CodeCleaner@elephantsdream
+> fortress -h
 usage: fortress [-h] [-v] [-d | -i] [-r | -l START-END] [-e PATTERN] [-t]
                 [files [files ...]]
 

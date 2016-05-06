@@ -20,15 +20,24 @@ Cleans archaic Fortran code.
 ## Installation:
 
 On your local machine, this should work:
-
 ```
 python setup.py install
 ```
 
 Working on a cluster or remote without any rights, a more fine grained approach:
+```
+python setup.py install --user
+```
 
+If you want to deinstall FORTRESS later on, you can use 
 ```
 python setup.py install --user --record install.txt
+```
+instead. All installed files are documented in `install.txt` then.
+
+Furthermore the installation dir should be added to `PATH`. I.e.:
+```
+export PATH=$PATH:~/.local/bin
 ```
 
 
@@ -36,7 +45,8 @@ python setup.py install --user --record install.txt
 
 ```
 > fortress -h
-usage: fortress [-h] [-v] [-d | -i] [-r | -l START-END] [-e PATTERN] [-t]
+usage: fortress [-h] [-v] [-d | -i] [-r | -l START-END] [-e PATTERN]
+                [-s STYLE] [--strict] [-t]
                 [files [files ...]]
 
 FORTRESS is a formatter/modernizer of legacy FORTRAN code.
@@ -58,6 +68,10 @@ optional arguments:
                         range of lines to reformat; 1-based
   -e PATTERN, --exclude PATTERN
                         patterns for files to exclude from formatting
+  -s STYLE, --style STYLE
+                        specify formatting style via local style.ini
+  --strict              applies all available formatting options / style.ini
+                        will be ignored
   -t, --lint            lint files
 ```
 

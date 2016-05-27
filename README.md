@@ -4,7 +4,7 @@ Cleans archaic Fortran code.
 
 ## Installation and Simple Use Case.
 
-[![asciicast](https://asciinema.org/a/47051.png)](https://asciinema.org/a/47051)
+[![](https://asciinema.org/a/47055.png)](https://asciinema.org/a/47055)
 
 ## Features:
 

@@ -2,9 +2,11 @@
 
 Cleans archaic Fortran code.
 
+
 ## Installation and Simple Use Case.
 
 [![](https://asciinema.org/a/47055.png)](https://asciinema.org/a/47055)
+
 
 ## Features:
 
@@ -77,29 +79,6 @@ optional arguments:
                         will be ignored
   -t, --lint            lint files
 ```
-
-
-## Changelog:
-
-### 2016.05.02
-
-Added:
-- Add new frontend
-- Add Vim plugin
-
-Removed:
-- Old frontend
-
-### 2016.02.17
-Changed:
-- Structure. Everything in `./src` now.
-
-Added:
-- README.md
-- TODO.md
-
-Imported:
-- Import original project from Florian Z's repo.
 
 
 ## Genesis Note:

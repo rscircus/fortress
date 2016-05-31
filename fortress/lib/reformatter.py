@@ -66,6 +66,7 @@ class Reformatter:
                 codeLine.convertFixedToFree()
             if fortress_style.Get('ADD_SPACES_AROUND_OPERATORS'):
                 codeLine.addSpacesInCode()
+            codeLine.fixFreeContinuation()
 
         # Reindents the code(block):
         if fortress_style.Get('REINDENT'):
@@ -123,27 +124,58 @@ class Reformatter:
       Call before stripping whitespace and indent fix.
 
     """
-        # go through lines in reverse order
-        inConti = False
-        inTightConti = False
-        for codeLine in reversed(self.codeLines):
-            # is it a code line and is it followed by continuation?
-            if codeLine.hasCode() and inConti:
-                codeLine.isContinued = True
-                # is it a 'tight' continuation?
-                if inTightConti and not len(codeLine.commentSpace) \
-                        and len(codeLine.rightSpace) == 1:
-                    codeLine.isTightContinued = True
-                inConti = False
-                inTightConti = False
 
-            # check if line is continuation
-            if codeLine.isContinuation:
-                inConti = True
-                # is it a 'tight' continuation?
-                if not codeLine.isFreeForm and not len(codeLine.leftSpace):
-                    codeLine.isTightContinuation = True
-                    inTightConti = True
+        # In free-form, continued lines may not be marked as such.
+        # Therefore, we have to ensure that every 'continued' line
+        # is followed by a 'continuation'.
+        # In fixed-form, we need to walk through the file backwards
+        # to identify 'continued' lines.
+
+        if self.isFreeForm:
+
+            inConti = False
+            inTightConti = False
+            # go through lines
+            for codeLine in self.codeLines:
+                # is it a code line and is it after a continued line?
+                if codeLine.hasCode() and inConti:
+                    codeLine.isContinuation = True
+                    # is it 'tightly' continued?
+                    if inTightConti:
+                        codeLine.isTightContinuation = True
+                    inConti = False
+                    inTightConti = False
+
+                # check if line is continued
+                if codeLine.isContinued:
+                    inConti = True
+                    # 'tightly' continued?
+                    if codeLine.isTightContinued:
+                        inTightConti = True
+
+        else: # fixed form
+
+          # go through lines in reverse order
+          inConti = False
+          inTightConti = False
+          for codeLine in reversed(self.codeLines):
+              # is it a code line and is it followed by continuation?
+              if codeLine.hasCode() and inConti:
+                  codeLine.isContinued = True
+                  # is it a 'tight' continuation?
+                  if inTightConti and not len(codeLine.commentSpace) \
+                          and len(codeLine.rightSpace) == 1:
+                      codeLine.isTightContinued = True
+                  inConti = False
+                  inTightConti = False
+
+              # check if line is continuation
+              if codeLine.isContinuation:
+                  inConti = True
+                  # is it a 'tight' continuation?
+                  if not codeLine.isFreeForm and not len(codeLine.leftSpace):
+                      codeLine.isTightContinuation = True
+                      inTightConti = True
 
 
     def generateCodeLines(self):

@@ -132,6 +132,9 @@ class UnwrappedLine:
         self.freeContBeg = match.group(1)
         self.isContinuation = True
         self.line = match.group(2)
+        # tight?
+        if len(self.freeContBeg) == 1:
+          self.isTightContinuation = True
 
       # check for continuation end
       match = re.match(r"(.*?)(\s*&)$", self.line)
@@ -139,6 +142,9 @@ class UnwrappedLine:
         self.freeContEnd = match.group(2)
         self.isContinued = True
         self.line = match.group(1)
+        # tight?
+        if len(self.freeContEnd) == 1:
+          self.isTightContinued = True
 
     # finished
     self.code = self.line
@@ -200,6 +206,13 @@ class UnwrappedLine:
     # 'real*8' to 'real(RK)'
     self.code = re.sub(r"(?i)^\breal\b\s?\*\s?(\d+)\b", r"real(\1)", self.code)
     #self.code = re.sub(r"(?i)^\breal\b\s?\*\s?8\b", r"real(RK)", self.code)
+
+  def fixFreeContinuation(self):
+    """Add ampersands at beginnings of continued lines"""
+
+    if self.isContinuation and len(self.freeContBeg) == 0:
+      self.freeContBeg = ("&" + self.leftSpace) if self.isTightContinuation else "& "
+
 
   def addSpacesInCode(self):
     """Enhances readability by adding spaces between various operators."""

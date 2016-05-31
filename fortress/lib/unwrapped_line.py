@@ -125,6 +125,8 @@ class UnwrappedLine:
         self.freeLabel = match.group(1)
         self.line = match.group(2)
 
+      # Check for continuations
+      #
       # TODO: tight (no spaces) freeContXXX > 1
       # check for continuation start
       match = re.match(r"(&\s*)(.*?)$", self.line)
@@ -212,6 +214,9 @@ class UnwrappedLine:
 
     if self.isContinuation and len(self.freeContBeg) == 0:
       self.freeContBeg = ("&" + self.leftSpace) if self.isTightContinuation else "& "
+
+    if self.isContinued and len(self.freeContEnd) == 0:
+      self.freeContEnd = " &"
 
 
   def addSpacesInCode(self):

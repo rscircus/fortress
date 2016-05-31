@@ -207,7 +207,7 @@ class UnwrappedLine:
     self.code = re.sub(r"(?i)^\breal\b\s?\*\s?(\d+)\b", r"real(\1)", self.code)
     #self.code = re.sub(r"(?i)^\breal\b\s?\*\s?8\b", r"real(RK)", self.code)
 
-  def fixFreeContinuation(self):
+  def addOptAmpersandToCont(self):
     """Add ampersands at beginnings of continued lines"""
 
     if self.isContinuation and len(self.freeContBeg) == 0:

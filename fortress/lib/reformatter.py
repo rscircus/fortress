@@ -66,7 +66,7 @@ class Reformatter:
                 codeLine.convertFixedToFree()
             if fortress_style.Get('ADD_SPACES_AROUND_OPERATORS'):
                 codeLine.addSpacesInCode()
-            codeLine.fixFreeContinuation()
+            codeLine.addOptAmpersandToCont()
 
         # Reindents the code(block):
         if fortress_style.Get('REINDENT'):
@@ -120,22 +120,24 @@ class Reformatter:
     def identifyContinuations(self):
         """Identify continuated lines.
 
+        In free-form, continued lines may not be marked as such.
+        Therefore, we have to ensure that every 'continued' line
+        is followed by a 'continuation'.
+
+        In fixed-form, we need to walk through the file backwards
+        to identify 'continued' lines.
+
     Note:
       Call before stripping whitespace and indent fix.
 
+    Definitions:
+      isContinued means there exists an & at the end of a line
+      isContinuation means there exists an & at the beginning of a line
     """
 
-        # In free-form, continued lines may not be marked as such.
-        # Therefore, we have to ensure that every 'continued' line
-        # is followed by a 'continuation'.
-        # In fixed-form, we need to walk through the file backwards
-        # to identify 'continued' lines.
-
         if self.isFreeForm:
-
             inConti = False
             inTightConti = False
-            # go through lines
             for codeLine in self.codeLines:
                 # is it a code line and is it after a continued line?
                 if codeLine.hasCode() and inConti:
@@ -154,8 +156,6 @@ class Reformatter:
                         inTightConti = True
 
         else: # fixed form
-
-          # go through lines in reverse order
           inConti = False
           inTightConti = False
           for codeLine in reversed(self.codeLines):

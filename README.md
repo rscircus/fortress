@@ -24,6 +24,13 @@ Cleans archaic Fortran code.
 
 ## Installation:
 
+Assuming, you cloned the repo into your location of choice via:
+
+```
+git clone https://github.com/rscircus/fortress
+cd fortress
+```
+
 On your local machine, this should work:
 ```
 python setup.py install

@@ -211,7 +211,7 @@ class UnwrappedLine:
     """Add ampersands at beginnings of continued lines"""
 
     if self.isContinuation and len(self.freeContBeg) == 0:
-      self.freeContBeg = "&" if self.isTightContinuation else "& "
+      self.freeContBeg = ("&" + self.leftSpace) if self.isTightContinuation else "& "
 
 
   def addSpacesInCode(self):

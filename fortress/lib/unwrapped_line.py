@@ -295,7 +295,8 @@ class UnwrappedLine:
       return "if"
     elif re.match(r"(?i)program\b", trans):
       return "program"
-    elif re.match(r"(?i)subroutine\b", trans):
+    elif re.match(r"(?i)subroutine\b", trans) \
+      or re.match(r"(?i)pure\s+subroutine\b", trans):
       return "subroutine"
     elif re.match(r"(?i)module\b", trans):
       return "module"

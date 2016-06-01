@@ -86,9 +86,12 @@ class Reformatter:
 
     """
         curIndent = 0
+        indents = []
         for codeLine in self.codeLines:
             if codeLine.decreasesIndentBefore():
                 curIndent -= 1
+                if len(indents) > 0:
+                    indents.pop()
             if curIndent < 0:
                 codeLine.remarks.append("Negative indentation level reached.")
                 curIndent = 0
@@ -96,8 +99,10 @@ class Reformatter:
             codeLine.setIndentation(curIndent, indent*" ")
             codeLine.leftSpace += (contiIndent*" " if codeLine.isContinuation else "")
 
-            if codeLine.increasesIndentAfter():
+            lineIndent = codeLine.identifyIndentation(indents)
+            if lineIndent != False:
                 curIndent += 1
+                indents += [lineIndent]
 
             codeLine.preserveCommentPosition()
 

@@ -275,7 +275,7 @@ class UnwrappedLine:
     # put parts back together
     self.code = "\"".join(parts)
 
-  def increasesIndentAfter(self):
+  def identifyIndentation(self, indents):
     """Identify level increasing indentation manipulators."""
     trans = self.code
 
@@ -283,37 +283,55 @@ class UnwrappedLine:
     trans = re.sub(r"\"([^\"\\]|\\.)*\"", r"str", trans)
     # remove single quoted strings
     trans = re.sub(r"'([^'\\]|\\.)*'", r"str", trans)
+    # remove string beginnings in continued lines
+    if self.isContinued:
+      trans = re.sub(r"\"([^\"\\]|\\.)*$", r"str", trans)
+      trans = re.sub(r"'([^'\\]|\\.)*$", r"str", trans)
 
         #or re.match(r"(?i)(\w+:\s*)?if\b.*?\bthen\b", self.code) \
-    if re.match(r"(?i)(\w+:\s*)?do\b", trans) \
-        or re.search(r"(?i)\bthen$", trans) \
-        or re.match(r"(?i)program\b", trans) \
-        or re.match(r"(?i)subroutine\b", trans) \
-        or re.match(r"(?i)module\b", trans) \
-        or re.match(r"(?i)type\s*[^\s\(]", trans) \
-        or re.match(r"(?i)interface\b", trans) \
-        or re.match(r"(?i)block\s?data\b", trans) \
-        or re.search(r"(?i)\bfunction\b", trans) \
-        and not re.match(r"(?i)end\b", trans) \
-        or re.match(r"(?i)select\b", trans) \
-        or re.match(r"(?i)case\b", trans) \
-        or re.match(r"(?i)else$", trans):
+    if re.match(r"(?i)(\w+:\s*)?do\b", trans):
+      return "do"
+    elif re.search(r"(?i)\bthen$", trans):
+      return "if"
+    elif re.match(r"(?i)program\b", trans):
+      return "program"
+    elif re.match(r"(?i)subroutine\b", trans):
+      return "subroutine"
+    elif re.match(r"(?i)module\b", trans):
+      return "module"
+    elif re.match(r"(?i)type\s*[^\s\(]", trans):
+      return "type"
+    elif re.match(r"(?i)interface\b", trans):
+      return "interface"
+    elif re.match(r"(?i)block\s?data\b", trans):
+      return "blockdata"
+    elif re.match(r"(?i)select\b", trans):
+      return "select"
+    elif re.match(r"(?i)case\b", trans):
+      return "select"
+    elif re.match(r"(?i)else$", trans):
+      return "if"
         #or re.match(r"(?i)else(if)?\b", self.code):
-      return True
+    elif re.match(r"(?i)where\b", trans):
+      # now keep replacing innermost brackets using '!'
+      # (! cannot occur outside of strings)
+      while re.search(r"\([^\(\)]+\)", trans):
+        trans = re.sub(r"\([^\(\)]+\)", "!", trans)
+
+      # now if just one '!' remains, there was only one
+      # bracket term
+      if trans.count("!") == 1:
+        return "where"
+    # also check for function statement
+    # (ignore in continuation lines, it will probably
+    # always appear in the first line)
+    elif not "subroutine" in indents and not "function" in indents \
+      and not "program" in indents \
+      and re.search(r"(?i)\bfunction\b", trans) \
+      and not re.match(r"(?i)end\b", trans) \
+      and not self.isContinuation:
+      return "function"
     else:
-      # need to check for where statement separately
-      if re.match(r"(?i)where\b", trans):
-
-        # now keep replacing innermost brackets using '!'
-        # (! cannot occur outside of strings)
-        while re.search(r"\([^\(\)]+\)", trans):
-          trans = re.sub(r"\([^\(\)]+\)", "!", trans)
-
-        # now if just one '!' remains, there was only one
-        # bracket term
-        if trans.count("!") == 1:
-          return True
-
       return False
 
   def decreasesIndentBefore(self):

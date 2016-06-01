@@ -222,7 +222,7 @@ class UnwrappedLine:
       if self.isStringContinuation:
         self.freeContBeg = "&" + self.leftSpace
       elif self.isTightContinuation:
-        self.freeContBeg = "&"
+        self.freeContBeg = "& " if len(self.leftSpace) else "&"
       else:
         self.freeContBeg = "& "
 
@@ -230,12 +230,40 @@ class UnwrappedLine:
       self.freeContEnd = " &"
 
 
+  def separateStrings(self):
+    """Separate code into statement and string parts."""
+
+    parts = []
+    curPart = ""
+    curQuotes = ""
+    escaped = False
+    for c in self.code:
+      # search for beginning of string
+      if len(curQuotes) == 0 and c in ["\"", "'"]:
+        curQuotes = c
+        parts += [curPart]
+        curPart = c
+      # search for string ending
+      elif len(curQuotes) > 0 and not escaped and c == curQuotes:
+        curQuotes = ""
+        curPart += c
+        parts += [curPart]
+        curPart = ""
+      else:
+        curPart += c
+      
+      escaped = (c == "\\")
+
+    parts += [curPart]
+
+    return parts
+
+
   def addSpacesInCode(self):
     """Enhances readability by adding spaces between various operators."""
-    # mark non-escaped quotation marks by an 'a' in front (this is arbitrary)
-    marked = re.sub(r"([^\\]|^)(\")", r"\1a\2", self.code)
-    # now split by 'a"'
-    parts = re.split(r"a\"", marked)
+
+    parts = self.separateStrings()
+
     # now you can go through all even-numbered parts
     for i in range(0, len(parts), 2):
       part = parts[i]
@@ -253,12 +281,14 @@ class UnwrappedLine:
       part = re.sub(r"([^\s\*])(\*(?:[^\*]|$))", r"\1 \2", part)
 
       ## operator -
-      part = re.sub(r"(-)(\S)", r"\1 \2", part)
-      part = re.sub(r"(\S)(-)", r"\1 \2", part)
+      ## (need to preserve scientific numbers, e-5 or E-4)
+      part = re.sub(r"((?:^|[^eE])-)(\S)", r"\1 \2", part)
+      part = re.sub(r"([^\seE])(-)", r"\1 \2", part)
 
       ## operator +
-      part = re.sub(r"(\+)(\S)", r"\1 \2", part)
-      part = re.sub(r"(\S)(\+)", r"\1 \2", part)
+      ## (need to preserve scientific numbers, e+5 or E+4)
+      part = re.sub(r"((?:^|[^eE])\+)(\S)", r"\1 \2", part)
+      part = re.sub(r"([^\seE])(\+)", r"\1 \2", part)
 
       ## operator =
       part = re.sub(r"(=)(\S)", r"\1 \2", part)
@@ -284,7 +314,7 @@ class UnwrappedLine:
       parts[i] = part
 
     # put parts back together
-    self.code = "\"".join(parts)
+    self.code = "".join(parts)
 
   def replaceStrings(self, string):
     """Replace strings by a fictitious variable name"""

@@ -143,6 +143,7 @@ class Reformatter:
         if self.isFreeForm:
             inConti = False
             inTightConti = False
+            inStringConti = False
             for codeLine in self.codeLines:
                 # is it a code line and is it after a continued line?
                 if codeLine.hasCode() and inConti:
@@ -150,8 +151,12 @@ class Reformatter:
                     # is it 'tightly' continued?
                     if inTightConti:
                         codeLine.isTightContinuation = True
+                    # is continuation of string?
+                    if inStringConti:
+                        codeLine.isStringContinuation = True
                     inConti = False
                     inTightConti = False
+                    inStringConti = False
 
                 # check if line is continued
                 if codeLine.isContinued:
@@ -159,6 +164,9 @@ class Reformatter:
                     # 'tightly' continued?
                     if codeLine.isTightContinued:
                         inTightConti = True
+                    # continued in string?
+                    if codeLine.isStringContinued:
+                        inStringConti = True
 
         else: # fixed form
           inConti = False

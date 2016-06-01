@@ -44,6 +44,8 @@ class UnwrappedLine:
     self.isContinuation = False
     self.isTightContinued = False
     self.isTightContinuation = False
+    self.isStringContinued = False
+    self.isStringContinuation = False
 
   def replaceTabsBySpaces(self, tabLength):
     """Remove all tabs from line and replace by right amount of spaces.
@@ -147,6 +149,10 @@ class UnwrappedLine:
         # tight?
         if len(self.freeContEnd) == 1:
           self.isTightContinued = True
+        # break within character string?
+        trans = self.replaceStrings(match.group(1))
+        if re.search(r"[\"']", trans):
+          self.isStringContinued = True
 
     # finished
     self.code = self.line
@@ -213,7 +219,12 @@ class UnwrappedLine:
     """Add ampersands at beginnings of continued lines"""
 
     if self.isContinuation and len(self.freeContBeg) == 0:
-      self.freeContBeg = ("&" + self.leftSpace) if self.isTightContinuation else "& "
+      if self.isStringContinuation:
+        self.freeContBeg = "&" + self.leftSpace
+      elif self.isTightContinuation:
+        self.freeContBeg = "&"
+      else:
+        self.freeContBeg = "& "
 
     if self.isContinued and len(self.freeContEnd) == 0:
       self.freeContEnd = " &"
@@ -275,14 +286,22 @@ class UnwrappedLine:
     # put parts back together
     self.code = "\"".join(parts)
 
+  def replaceStrings(self, string):
+    """Replace strings by a fictitious variable name"""
+
+    # remove double quoted strings
+    string = re.sub(r"\"([^\"\\]|\\.)*\"", r"str", string)
+    # remove single quoted strings
+    string = re.sub(r"'([^'\\]|\\.)*'", r"str", string)
+
+    return string
+
   def identifyIndentation(self, indents):
     """Identify level increasing indentation manipulators."""
     trans = self.code
 
-    # remove double quoted strings
-    trans = re.sub(r"\"([^\"\\]|\\.)*\"", r"str", trans)
-    # remove single quoted strings
-    trans = re.sub(r"'([^'\\]|\\.)*'", r"str", trans)
+    trans = self.replaceStrings(trans)
+
     # remove string beginnings in continued lines
     if self.isContinued:
       trans = re.sub(r"\"([^\"\\]|\\.)*$", r"str", trans)

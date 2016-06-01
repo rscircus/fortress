@@ -298,7 +298,8 @@ class UnwrappedLine:
     elif re.match(r"(?i)subroutine\b", trans) \
       or re.match(r"(?i)pure\s+subroutine\b", trans):
       return "subroutine"
-    elif re.match(r"(?i)module\b", trans):
+    elif re.match(r"(?i)module\b", trans) \
+      and not re.match(r"(?i)module\s+procedure\b", trans):
       return "module"
     elif re.match(r"(?i)type\s*[^\s\(]", trans):
       return "type"
@@ -326,6 +327,8 @@ class UnwrappedLine:
     # also check for function statement
     # (ignore in continuation lines, it will probably
     # always appear in the first line)
+    elif re.match(r"(?i)contains$", trans):
+      return "contains"
     elif not "subroutine" in indents and not "function" in indents \
       and not "program" in indents \
       and re.search(r"(?i)\bfunction\b", trans) \
@@ -338,7 +341,8 @@ class UnwrappedLine:
   def decreasesIndentBefore(self):
     """Identify level decreasing indentation manipulators."""
     if re.match(r"(?i)(end(if|do|where)?|else(if)?)\b", self.code) \
-        or re.match(r"(?i)case\b", self.code):
+        or re.match(r"(?i)case\b", self.code) \
+        or re.match(r"(?i)contains$", self.code):
       return True
     else:
       return False

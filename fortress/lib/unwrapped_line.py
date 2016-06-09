@@ -268,31 +268,31 @@ class UnwrappedLine:
     for i in range(0, len(parts), 2):
       part = parts[i]
 
-      ## commas
-      part = re.sub(r",(\S)", r", \1", part)
+      ### commas
+      #part = re.sub(r",(\S)", r", \1", part)
 
-      ## operator /
-      if part.find("common") == -1:
-        part = re.sub(r"(/)(\S)", r"\1 \2", part)
-        part = re.sub(r"(\S)(/)", r"\1 \2", part)
+      ### operator /
+      #if part.find("common") == -1:
+      #  part = re.sub(r"(/)(\S)", r"\1 \2", part)
+      #  part = re.sub(r"(\S)(/)", r"\1 \2", part)
 
-      ## operator * (only if it's not **)
-      part = re.sub(r"((?:[^\*]|^)\*)([^\s\*])", r"\1 \2", part)
-      part = re.sub(r"([^\s\*])(\*(?:[^\*]|$))", r"\1 \2", part)
+      ### operator * (only if it's not **)
+      #part = re.sub(r"((?:[^\*]|^)\*)([^\s\*])", r"\1 \2", part)
+      #part = re.sub(r"([^\s\*])(\*(?:[^\*]|$))", r"\1 \2", part)
 
-      ## operator -
-      ## (need to preserve scientific numbers, e-5 or E-4)
-      part = re.sub(r"((?:^|[^eE])-)(\S)", r"\1 \2", part)
-      part = re.sub(r"([^\seE])(-)", r"\1 \2", part)
+      ### operator -
+      ### (need to preserve scientific numbers, e-5 or E-4)
+      #part = re.sub(r"((?:^|[^eE])-)(\S)", r"\1 \2", part)
+      #part = re.sub(r"([^\seE])(-)", r"\1 \2", part)
 
-      ## operator +
-      ## (need to preserve scientific numbers, e+5 or E+4)
-      part = re.sub(r"((?:^|[^eE])\+)(\S)", r"\1 \2", part)
-      part = re.sub(r"([^\seE])(\+)", r"\1 \2", part)
+      ### operator +
+      ### (need to preserve scientific numbers, e+5 or E+4)
+      #part = re.sub(r"((?:^|[^eE])\+)(\S)", r"\1 \2", part)
+      #part = re.sub(r"([^\seE])(\+)", r"\1 \2", part)
 
-      ## operator =
-      part = re.sub(r"(=)(\S)", r"\1 \2", part)
-      part = re.sub(r"(\S)(=)", r"\1 \2", part)
+      ### operator =
+      #part = re.sub(r"(=)(\S)", r"\1 \2", part)
+      #part = re.sub(r"(\S)(=)", r"\1 \2", part)
 
       # after 'if', 'where'
       part = re.sub(r"(?i)\b(if|where)\(", r"\1 (", part)

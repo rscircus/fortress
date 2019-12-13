@@ -100,7 +100,7 @@ class UnwrappedLine:
         self.line = match.group(2)
       # otherwise check for continuation
       #elif len(self.line) > 5 and self.line[0] != "\t" and self.line[5] not in [' ', '0']:
-      elif len(self.line) > 5 and self.line[5] == "&":
+      elif len(self.line) > 5 and self.line[5] not in [' ', '0']:
         self.fixedCont = self.line[:6]
         self.isContinuation = True
         self.line = self.line[6:]
